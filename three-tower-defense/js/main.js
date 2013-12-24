@@ -42,11 +42,13 @@ animate();
 function init() {
 	// Basic initial of THREE
 	scene = new THREE.Scene();
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({antialias:true});
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	if (detailLevel == 'high') {
 		renderer.shadowMapEnabled = true;
 	}
+	
+	// Add camera
 	camera = new THREE.PerspectiveCamera(
 		45,
 		window.innerWidth / window.innerHeight,
@@ -64,6 +66,7 @@ function init() {
 	window.addEventListener('resize', onWindowResize, false);
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
 	
+	// Camera controls (with mouse)
 	controls = new THREE.OrbitControls(camera);
 	controls.addEventListener('change', render);
 	
@@ -123,6 +126,8 @@ function init() {
 	for (i = 0; i < (boardSize.x / tileSize); i++) {
 		for (j = 0; j < (boardSize.z / tileSize); j++) {
 			tile = new Tile(THREE);
+			xPoint = (boardSize.x - (i * tileSize)) / tileSize;
+			yPoint = (boardSize.z - (j * tileSize)) / tileSize;
 			tile.position.x = 1 + (tileSize / 2) - (boardSize.x / 2) + (i * tileSize);
 			tile.position.y = boardSize.y / 2;
 			tile.position.z = 1 + (tileSize / 2) - (boardSize.z / 2) + (j * tileSize);
@@ -134,13 +139,27 @@ function init() {
 			else {
 				randomHeight = 4;
 			}
+			// The first and last row is used to spawn monsters.
+			if (xPoint == 1 || xPoint == (boardSize.x / tileSize)) {
+				randomHeight = 22;
+				tile.texture = 'images/grass-moss.jpg';
+			}
 			tile.size.y = randomHeight;
 			tile.position.y += (boardSize.y + randomHeight) * 2;
 			tile.position.y = 1 + (boardSize.y / 2);
 			tile.create();
 			tiles[count] = tile.getObject();
-			tiles[count].callback = function() { showBuildmenu(this); }
+			tiles[count].xPoint = xPoint;
+			tiles[count].yPoint = yPoint;
+			
+			if (xPoint == 1 || xPoint == (boardSize.x / tileSize)) {
+				tiles[count].callback = function() { return true; }
+			}
+			else {
+				tiles[count].callback = function() { showBuildmenu(this); }
+			}
 			tiles[count].height = randomHeight;
+
 			if (detailLevel == 'high') {
 				tiles[count].castShadow = true;
 				tiles[count].receiveShadow = true;
@@ -181,7 +200,7 @@ function render() {
 	if (detailLevel == 'high') {
 		
 		// Calculate skybox rotation and light rotation
-		sunLightTimer += 0.00018; // @todo finetune
+		sunLightTimer += 0.00014; // @todo finetune
 		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
 		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
 		skyBox.rotation.y += 0.00015;
@@ -257,6 +276,9 @@ function showBuildmenu(tile) {
 		buildmenu.innerHTML += buildings[i].html;
 	}
 	buildmenu.style.display = 'block';
+	buildmenu.innerHTML += tile.xPoint;
+	buildmenu.innerHTML += ', ';
+	buildmenu.innerHTML += tile.yPoint;
 }
 
 /**

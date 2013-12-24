@@ -12,11 +12,11 @@ boardSize.z = 512; // Depth
  * @param int tileSize
  * The x and y size of a tile. Must be a multiple of 2. Also used for buildings.
  */
-var tileSize = 64;
+var tileSize = 128;
 
 /**
  * @param string detailLevel
  * Set the detail of the level. Options are 'lew', 'medium', 'high'.
  * Default value is low.
  */
-var detailLevel = 'high'; // Detail of the level 'low', 'medium', 'high'
+var detailLevel = 'low'; // Detail of the level 'low', 'medium', 'high'
