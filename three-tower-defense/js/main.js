@@ -3,7 +3,7 @@
  * A simple world in outer-space where two words of chaos and order collide.
  */
 
-var camera, controls, scene, renderer, projector;
+var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300;
 
 /**
  * @param object skyBox
@@ -68,25 +68,15 @@ function init() {
 	controls.addEventListener('change', render);
 	
 	// Light
-	var light = new THREE.SpotLight(0xffff00);
-	light.position.set(0 - boardSize.x, 512, 0);
-	scene.add(light);
-	light.intensity = 2;
+	sunLight = new THREE.SpotLight(0xffff00);
+	sunLight.position.set(0 - boardSize.x, 512, 0);
+	scene.add(sunLight);
+	sunLight.intensity = 2;
 	if (detailLevel == 'high') {
-		light.shadowCameraVisible = true;
-		light.shadowDarkness = 0.70;
-		light.castShadow = true;
+		sunLight.shadowCameraVisible = true;
+		sunLight.shadowDarkness = 0.70;
+		sunLight.castShadow = true;
 	}
-	
-	// create "light-ball" meshes
-	var sphereGeometry = new THREE.SphereGeometry( 10, 16, 8 );
-	var darkMaterial = new THREE.MeshBasicMaterial( { color: 0xff9900 } );
-	var wireframeMaterial = new THREE.MeshBasicMaterial( 
-			{ color: 0xffff00, wireframe: true, transparent: true } );
-	var shape = THREE.SceneUtils.createMultiMaterialObject( 
-		sphereGeometry, [ darkMaterial, wireframeMaterial ] );
-	shape.position = light.position;
-	scene.add(shape);
 	
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
@@ -189,9 +179,15 @@ function render() {
 		mars.rotation.y -= 0.0020;
 	}
 	if (detailLevel == 'high') {
+		
+		// Calculate skybox rotation and light rotation
+		sunLightTimer += 0.00018; // @todo finetune
+		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
+		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
 		skyBox.rotation.y += 0.00015;
+		
 		timer = Date.now() * 0.001;
-		floor.position.y = Math.sin( timer ) * 16;
+		floor.position.y = Math.sin(timer) * 16;
 		for (i = 0; i < tiles.length; i++) {
 			tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
 			if (towers[i] != undefined) {
