@@ -5,4 +5,9 @@ A long long time ago, in a place far beyond our time, was a world that was not l
 
 After the creation of stars and planets a new force came to existence and entered the world of order. Chaos followed and structure became fragile. It's time to battle this order and keep things basic again. Are you able to keep things simple?
 
-This is a space-like tower defense game build with the THREE JS Framework.
+This is a space-like tower defense game build with the THREE JS Framework rendered in WebGL.
+
+Problems?
+===================
+
+If you have problems running the game place the folder in the webroot of your webserver and open the index.html in Chrome or Firefox.
