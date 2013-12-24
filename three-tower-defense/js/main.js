@@ -42,8 +42,11 @@ animate();
 function init() {
 	// Basic initial of THREE
 	scene = new THREE.Scene();
-	renderer = new THREE.WebGLRenderer({antialias:true});
+	renderer = new THREE.WebGLRenderer();
 	renderer.setSize(window.innerWidth, window.innerHeight);
+	if (detailLevel == 'high') {
+		renderer.shadowMapEnabled = true;
+	}
 	camera = new THREE.PerspectiveCamera(
 		45,
 		window.innerWidth / window.innerHeight,
@@ -65,9 +68,26 @@ function init() {
 	controls.addEventListener('change', render);
 	
 	// Light
-	var light = new THREE.PointLight(0xffffff, 0.75);
-	light.position.set(0 - boardSize.x, 2048, 0);
+	var light = new THREE.SpotLight(0xffff00);
+	light.position.set(0 - boardSize.x, 512, 0);
 	scene.add(light);
+	light.intensity = 2;
+	if (detailLevel == 'high') {
+		light.shadowCameraVisible = true;
+		light.shadowDarkness = 0.70;
+		light.castShadow = true;
+	}
+	
+	// create "light-ball" meshes
+	var sphereGeometry = new THREE.SphereGeometry( 10, 16, 8 );
+	var darkMaterial = new THREE.MeshBasicMaterial( { color: 0xff9900 } );
+	var wireframeMaterial = new THREE.MeshBasicMaterial( 
+			{ color: 0xffff00, wireframe: true, transparent: true } );
+	var shape = THREE.SceneUtils.createMultiMaterialObject( 
+		sphereGeometry, [ darkMaterial, wireframeMaterial ] );
+	shape.position = light.position;
+	scene.add(shape);
+	
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
 	
@@ -78,6 +98,9 @@ function init() {
 	planet.position.z = 0;
 	planet.create();
 	moon = planet.getObject();
+	if (detailLevel == 'high') {
+		moon.castShadow = true;
+	}
 	scene.add(moon);
 	planet = new Planet(THREE);
 	planet.position.x = 0 - (boardSize.x / 2);
@@ -87,6 +110,9 @@ function init() {
 	planet.ambient = 0x404040;
 	planet.create();
 	mars = planet.getObject();
+	if (detailLevel == 'high') {
+		mars.castShadow = true;
+	}
 	scene.add(mars);
 	
 	// Create floor
@@ -99,6 +125,7 @@ function init() {
 	geometryFloor = new THREE.CubeGeometry(boardSize.x, boardSize.y, boardSize.z);
 	floor = new THREE.Mesh(geometryFloor, materialGrass);
 	floor.position.set(0, 0, 0);
+	floor.receiveShadow = true;
 	scene.add(floor);
 	
 	// Create tiles
@@ -112,10 +139,10 @@ function init() {
 			tile.size.x = tileSize - 4;
 			tile.size.z = tileSize - 4;
 			if (detailLevel == 'high') {
-				randomHeight = Math.random()*16;
+				randomHeight = Math.random()*16 + 4;
 			}
 			else {
-				randomHeight = 2;
+				randomHeight = 4;
 			}
 			tile.size.y = randomHeight;
 			tile.position.y += (boardSize.y + randomHeight) * 2;
@@ -124,6 +151,10 @@ function init() {
 			tiles[count] = tile.getObject();
 			tiles[count].callback = function() { showBuildmenu(this); }
 			tiles[count].height = randomHeight;
+			if (detailLevel == 'high') {
+				tiles[count].castShadow = true;
+				tiles[count].receiveShadow = true;
+			}
 			scene.add(tiles[count]);
 			count++;
 		}
@@ -144,6 +175,7 @@ function init() {
 			}));
 		skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 		skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
+		skyBox.position.set(0, 1024, 0);
 		scene.add(skyBox);
 	}
 	
@@ -157,7 +189,7 @@ function render() {
 		mars.rotation.y -= 0.0020;
 	}
 	if (detailLevel == 'high') {
-		skyBox.rotation.y += 0.00005;
+		skyBox.rotation.y += 0.00015;
 		timer = Date.now() * 0.001;
 		floor.position.y = Math.sin( timer ) * 16;
 		for (i = 0; i < tiles.length; i++) {
@@ -166,8 +198,14 @@ function render() {
 				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
 			}
 			if (tiles[i].selected != undefined && tiles[i].selected == true) {
-				tiles[i].position.y += 10;
-				tiles[i].rotation.y += 0.005;
+				tiles[i].rotation.y += 0.008;
+				activeTimer = Date.now() * 0.005;
+				tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 8);
+				if (towers[i] != undefined) {
+					// Active tower has to be on top of the selected tile as well (for updating)
+					towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+					towers[i].rotation.y += 0.008;
+				}
 			}
 			else {
 				tiles[i].rotation.y = 0;
@@ -235,10 +273,18 @@ function build(buildingIndex) {
 	}
 	for (i = 0; i < tiles.length; i++) {
 		if (tiles[i].selected == true) {
+			if (towers[i] != undefined) {
+				// @todo UPGRADE tower
+				hideBuildmenu();
+				return true;
+			}
 			building = buildings[buildingIndex].mesh();
 			building.position.x = tiles[i].position.x;
 			building.position.y = tiles[i].position.y + (tileSize / 2);
 			building.position.z = tiles[i].position.z;
+			if (detailLevel == 'high') {
+				building.castShadow = true;
+			}
 			scene.add(building);
 			towers[i] = building; // Push the new tower to the tower array
 			hideBuildmenu();
