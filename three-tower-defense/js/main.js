@@ -3,29 +3,6 @@
  * A simple world in outer-space where two words of chaos and order collide.
  */
 
-/**
- * @param object boardSize
- * Holds the default values of the (game)board size. Each side must be an multiple of
- * 2.
- */
-var boardSize = new Object();
-boardSize.x = 768; // Width
-boardSize.y = 64; // Height
-boardSize.z = 512; // Depth
-
-/**
- * @param int tileSize
- * The x and y size of a tile. Must be a multiple of 2. Also used for buildings.
- */
-var tileSize = 64;
-
-/**
- * @param string detailLevel
- * Set the detail of the level. Options are 'lew', 'medium', 'high'.
- * Default value is low.
- */
-var detailLevel = 'high'; // Detail of the level 'low', 'medium', 'high'
-
 var camera, controls, scene, renderer, projector;
 
 /**
@@ -242,6 +219,28 @@ function showBuildmenu(tile) {
 		buildmenu.innerHTML += buildings[i].html;
 	}
 	buildmenu.style.display = 'block';
+}
+
+/**
+ * Build a building on the selected tile
+ * @param int buildingIndex the index of the building
+ */
+function build(buildingIndex) {
+	if (buildings[buildingIndex] == undefined) {
+		return false;
+	}
+	for (i = 0; i < tiles.length; i++) {
+		if (tiles[i].selected == true) {
+			building = buildings[buildingIndex].mesh();
+			building.position.x = tiles[i].position.x;
+			building.position.y = tiles[i].position.y;
+			building.position.z = tiles[i].position.z;
+			scene.add(building);
+			towers[i] = building; // Push the new tower to the tower array
+			hideBuildmenu();
+			return true;
+		}
+	}
 }
 
 /**

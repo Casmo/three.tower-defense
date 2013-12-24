@@ -3,17 +3,35 @@
  * Default THREE material for the buildings.
  */
 var buildingMaterial = new THREE.MeshBasicMaterial({color: 0xff9900});
+/**
+ * @param array buildings
+ * Available buildings to build
+ */
 var buildings = new Array();
 // triangle
 buildings[0] = new Object();
-buildings[0].html = '<img src="images/towers/001.png" class="building" />';
-//buildings[0].shape = new THREE.CubeGeometry(tileSize, tileSize, tileSize);
+buildings[0].html = '<img src="images/towers/001.png" class="building" onclick="build(0);" />';
+buildings[0].mesh = function() { return new THREE.Mesh(
+		new THREE.CubeGeometry(tileSize, tileSize, tileSize),
+		buildingMaterial
+	);
+}
 // circle
 buildings[1] = new Object();
-buildings[1].html = '<img src="images/towers/002.png" class="building" />';
+buildings[1].html = '<img src="images/towers/002.png" class="building" onclick="build(1);" />';
+buildings[1].mesh = function() { return new THREE.Mesh(
+		new THREE.CubeGeometry(tileSize, tileSize, tileSize),
+		buildingMaterial
+	);
+}
 // square
 buildings[2] = new Object();
-buildings[2].html = '<img src="images/towers/003.png" class="building" />';
+buildings[2].html = '<img src="images/towers/003.png" class="building" onclick="build(2);" />';
+buildings[2].mesh = function() { return new THREE.Mesh(
+		new THREE.CubeGeometry(tileSize, tileSize, tileSize),
+		buildingMaterial
+	);
+}
 
 /**
  * Object to create planets and tiles in the THREE Framework
