@@ -11,8 +11,9 @@ var buildings = new Array();
 // triangle
 buildings[0] = new Object();
 buildings[0].html = '<img src="images/towers/001.png" class="building" onclick="build(0);" />';
-buildings[0].mesh = function() { return new THREE.Mesh(
-		new THREE.CubeGeometry(tileSize, tileSize, tileSize),
+buildings[0].mesh = function() {
+	return new THREE.Mesh(
+		new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
 		buildingMaterial
 	);
 }
@@ -20,7 +21,7 @@ buildings[0].mesh = function() { return new THREE.Mesh(
 buildings[1] = new Object();
 buildings[1].html = '<img src="images/towers/002.png" class="building" onclick="build(1);" />';
 buildings[1].mesh = function() { return new THREE.Mesh(
-		new THREE.CubeGeometry(tileSize, tileSize, tileSize),
+		new THREE.SphereGeometry((tileSize/2), 16, 16),
 		buildingMaterial
 	);
 }
@@ -28,7 +29,7 @@ buildings[1].mesh = function() { return new THREE.Mesh(
 buildings[2] = new Object();
 buildings[2].html = '<img src="images/towers/003.png" class="building" onclick="build(2);" />';
 buildings[2].mesh = function() { return new THREE.Mesh(
-		new THREE.CubeGeometry(tileSize, tileSize, tileSize),
+		new THREE.CubeGeometry(tileSize-16, tileSize, tileSize-16),
 		buildingMaterial
 	);
 }

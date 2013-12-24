@@ -123,6 +123,7 @@ function init() {
 			tile.create();
 			tiles[count] = tile.getObject();
 			tiles[count].callback = function() { showBuildmenu(this); }
+			tiles[count].height = randomHeight;
 			scene.add(tiles[count]);
 			count++;
 		}
@@ -161,6 +162,9 @@ function render() {
 		floor.position.y = Math.sin( timer ) * 16;
 		for (i = 0; i < tiles.length; i++) {
 			tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
+			if (towers[i] != undefined) {
+				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+			}
 			if (tiles[i].selected != undefined && tiles[i].selected == true) {
 				tiles[i].position.y += 10;
 				tiles[i].rotation.y += 0.005;
@@ -233,7 +237,7 @@ function build(buildingIndex) {
 		if (tiles[i].selected == true) {
 			building = buildings[buildingIndex].mesh();
 			building.position.x = tiles[i].position.x;
-			building.position.y = tiles[i].position.y;
+			building.position.y = tiles[i].position.y + (tileSize / 2);
 			building.position.z = tiles[i].position.z;
 			scene.add(building);
 			towers[i] = building; // Push the new tower to the tower array
