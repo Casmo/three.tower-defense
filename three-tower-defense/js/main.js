@@ -31,6 +31,12 @@ var Graph = new Graph([]);
 var towers = new Array();
 
 /**
+ * @param array monsters
+ * Monsters that has been spawned with the position and stats
+ */
+var monsters = new Array();
+
+/**
  * @param object buildmenu
  * The DOM element of the build menu (HTML <div>)
  */
@@ -161,9 +167,10 @@ function init() {
 			tiles[count] = tile.getObject();
 			tiles[count].x = x;
 			tiles[count].y = y;
+			tiles[count].size = tile.size;
 			
 			if (x == 0 || x == (boardSize.x / tileSize)-1) {
-				tiles[count].callback = function() { return calculatePath(); }
+				tiles[count].callback = function() { return spawnMonster(this); }
 			}
 			else {
 				tiles[count].callback = function() { return showBuildmenu(this); }
@@ -276,20 +283,19 @@ function onDocumentMouseDown(event) {
     }
 }
 
-/**
- * Callback when a player clicks on a Tile to build or upgrade a tower.
- * @param object tile the Tile that is actived
- */
-function showBuildmenu(tile) {
-	selectTile(tile);
-	buildmenu.innerHTML = '';
-	for (i = 0; i < buildings.length; i++) {
-		buildmenu.innerHTML += buildings[i].html;
+function spawnMonster(tile) {
+	monster = new Monster(THREE);
+	monster.position.x = tile.position.x;
+	monster.position.y = tile.position.y + monster.size.y + tile.size.y;
+	monster.position.z = tile.position.z;
+	monster.create();
+	monsterObject = monster.getObject();
+	if (detailLevel == 'high') {
+		monsterObject.castShadow = true;
 	}
-	buildmenu.style.display = 'block';
-	buildmenu.innerHTML += tile.x;
-	buildmenu.innerHTML += ', ';
-	buildmenu.innerHTML += tile.y;
+	scene.add(monsterObject);
+	monsters.push(monster);
+	monster.move();
 }
 
 /**
@@ -318,37 +324,14 @@ function build(buildingIndex) {
 			towers[i] = building; // Push the new tower to the tower array
 			// make the node unwalkeble
 			nodes[tiles[i].x][tiles[i].y] = 0;
+			// @todo CHECK if maze is open else destroy last tower
 			hideBuildmenu();
 			return true;
 		}
 	}
 }
 
-/**
- * Hide build menu
- */
-function hideBuildmenu() {
-	buildmenu.style.display = 'none';
-	deselectTiles();
-}
-
-/**
- * Select a clicked tile
- */
-function selectTile(tile) {
-	deselectTiles(); // Make sure nothing is selected
-	tile.selected = true;
-}
-
-/**
- * Deselect the tiles
- */
-function deselectTiles() {
-	for (i = 0; i < tiles.length; i++) {
-		tiles[i].selected = false;
-	}
-}
-
+// @todo add from and end
 function calculatePath() {
 	Graph.nodes = nodes;
 	var start = nodes[0][0];
