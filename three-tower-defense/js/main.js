@@ -1,6 +1,7 @@
 /**
- * Hello Three.js testing playground
+ * Three.js testing playground
  * A simple world in outer-space where two words of chaos and order collide.
+ * @author Mathieu de Ruiter (www.fellicht.nl)
  */
 
 var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300;
@@ -19,6 +20,8 @@ var skyBox = '';
  * allows player to build or upgrade a tower on this tile.
  */
 var tiles = new Array();
+var nodes = new Array(); // The path array for calculating shortest route [x][y]
+var Graph = new Graph([]);
 
 /**
  * @param array towers
@@ -123,16 +126,23 @@ function init() {
 	
 	// Create tiles
 	var count = 0;
-	for (i = 0; i < (boardSize.x / tileSize); i++) {
-		for (j = 0; j < (boardSize.z / tileSize); j++) {
+	for (x = 0; x < (boardSize.x / tileSize); x++) {
+		nodes[x] = [];
+		for (y = 0; y < (boardSize.z / tileSize); y++) {
+			nodes[x][y] = new GraphNode(x, y, 1);
+			
 			tile = new Tile(THREE);
-			xPoint = (boardSize.x - (i * tileSize)) / tileSize;
-			yPoint = (boardSize.z - (j * tileSize)) / tileSize;
-			tile.position.x = 1 + (tileSize / 2) - (boardSize.x / 2) + (i * tileSize);
+			
+			// Calculate the 3D position of the tile
+			tile.position.x = 1 + (tileSize / 2) - (boardSize.x / 2) + (x * tileSize);
 			tile.position.y = boardSize.y / 2;
-			tile.position.z = 1 + (tileSize / 2) - (boardSize.z / 2) + (j * tileSize);
+			tile.position.z = 1 + (tileSize / 2) - (boardSize.z / 2) + (y * tileSize);
+			
+			// Make the tile a little smaller to fit nicely on the map
 			tile.size.x = tileSize - 4;
 			tile.size.z = tileSize - 4;
+			
+			// Add hight for the tile
 			if (detailLevel == 'high') {
 				randomHeight = Math.random()*16 + 4;
 			}
@@ -140,7 +150,7 @@ function init() {
 				randomHeight = 4;
 			}
 			// The first and last row is used to spawn monsters.
-			if (xPoint == 1 || xPoint == (boardSize.x / tileSize)) {
+			if (x == 0 || x == (boardSize.x / tileSize) - 1) {
 				randomHeight = 22;
 				tile.texture = 'images/grass-moss.jpg';
 			}
@@ -149,14 +159,14 @@ function init() {
 			tile.position.y = 1 + (boardSize.y / 2);
 			tile.create();
 			tiles[count] = tile.getObject();
-			tiles[count].xPoint = xPoint;
-			tiles[count].yPoint = yPoint;
+			tiles[count].x = x;
+			tiles[count].y = y;
 			
-			if (xPoint == 1 || xPoint == (boardSize.x / tileSize)) {
-				tiles[count].callback = function() { return true; }
+			if (x == 0 || x == (boardSize.x / tileSize)-1) {
+				tiles[count].callback = function() { return calculatePath(); }
 			}
 			else {
-				tiles[count].callback = function() { showBuildmenu(this); }
+				tiles[count].callback = function() { return showBuildmenu(this); }
 			}
 			tiles[count].height = randomHeight;
 
@@ -165,6 +175,7 @@ function init() {
 				tiles[count].receiveShadow = true;
 			}
 			scene.add(tiles[count]);
+
 			count++;
 		}
 	}
@@ -276,9 +287,9 @@ function showBuildmenu(tile) {
 		buildmenu.innerHTML += buildings[i].html;
 	}
 	buildmenu.style.display = 'block';
-	buildmenu.innerHTML += tile.xPoint;
+	buildmenu.innerHTML += tile.x;
 	buildmenu.innerHTML += ', ';
-	buildmenu.innerHTML += tile.yPoint;
+	buildmenu.innerHTML += tile.y;
 }
 
 /**
@@ -305,6 +316,8 @@ function build(buildingIndex) {
 			}
 			scene.add(building);
 			towers[i] = building; // Push the new tower to the tower array
+			// make the node unwalkeble
+			nodes[tiles[i].x][tiles[i].y] = 0;
 			hideBuildmenu();
 			return true;
 		}
@@ -334,4 +347,12 @@ function deselectTiles() {
 	for (i = 0; i < tiles.length; i++) {
 		tiles[i].selected = false;
 	}
+}
+
+function calculatePath() {
+	Graph.nodes = nodes;
+	var start = nodes[0][0];
+	var end = nodes[5][3];
+	var result = astar.search(Graph.nodes, start, end);
+	//alert(result);
 }
