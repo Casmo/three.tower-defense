@@ -296,6 +296,20 @@ function spawnMonster(tile) {
 	monsters.push(monsterObject);
 }
 
+// @todo Caluclate grid X, Y with world X, Z position.
+function calculateX(xPosition) {
+	
+}
+function calculateY(yPosition) {
+	
+}
+function calculateXposition(x) {
+	
+}
+function calculateYposition(y) {
+	
+}
+
 /**
  * Build a building on the selected tile
  * @param int buildingIndex the index of the building
