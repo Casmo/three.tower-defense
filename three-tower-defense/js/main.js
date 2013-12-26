@@ -42,6 +42,12 @@ var monsters = new Array();
  */
 var buildMenu;
 
+/**
+ * Basis start point of the game board
+ */
+var basisX = (boardSize.x/2) + (tileSize/2);
+var basisY = (boardSize.z/2) + (tileSize/2);
+
 init();
 animate();
 
@@ -132,17 +138,21 @@ function init() {
 	
 	// Create tiles
 	var count = 0;
-	for (x = 0; x < (boardSize.x / tileSize); x++) {
+	for (var x = 0; x < (boardSize.x / tileSize); x++) {
 		nodes[x] = [];
-		for (y = 0; y < (boardSize.z / tileSize); y++) {
+		for (var y = 0; y < (boardSize.z / tileSize); y++) {
 			nodes[x][y] = new GraphNode(x, y, 1);
 			
 			tile = new Tile(THREE);
 			
 			// Calculate the 3D position of the tile
-			tile.position.x = 1 + (tileSize / 2) - (boardSize.x / 2) + (x * tileSize);
+//			tile.position.x = 1 + (tileSize / 2) - (boardSize.x / 2) + (x * tileSize);
+//			tile.position.y = boardSize.y / 2;
+//			tile.position.z = 1 + (tileSize / 2) - (boardSize.z / 2) + (y * tileSize);
+
+			tile.position.x = calculateXPosition(x); // 1 + (tileSize / 2) - (boardSize.x / 2) + (x * tileSize);
 			tile.position.y = boardSize.y / 2;
-			tile.position.z = 1 + (tileSize / 2) - (boardSize.z / 2) + (y * tileSize);
+			tile.position.z = calculateYPosition(y); // 1 + (tileSize / 2) - (boardSize.z / 2) + (y * tileSize);
 			
 			// Make the tile a little smaller to fit nicely on the map
 			tile.size.x = tileSize - 4;
@@ -247,25 +257,28 @@ function render() {
 	}
 	// Move monsters
 	for (i = 0; i < monsters.length; i++) {
-		tmpMX = ((0 - boardSize.x / 2) + (monsters[i].nextStep.x) * ((tileSize)/2) + tileSize);
-		tmpMY = ((0 - boardSize.z / 2) + (monsters[i].nextStep.y) * ((tileSize)/2) + tileSize);
+		//tmpMX = ((0 - boardSize.x / 2) + (monsters[i].nextStep.x) * ((tileSize)/2) + tileSize);
+		//tmpMY = ((0 - boardSize.z / 2) + (monsters[i].nextStep.y) * ((tileSize)/2) + tileSize);
+		tmpMX = calculateXPosition(monsters[i].nextStep.x);
+		tmpMY = calculateYPosition(monsters[i].nextStep.y);
 		if (tmpMX > monsters[i].position.x) {
-			monsters[i].position.x += 1;
+			monsters[i].position.x += 4;
 		}
 		else if (tmpMX < monsters[i].position.x) {
-			monsters[i].position.x -= 1;
+			monsters[i].position.x -= 4;
 		}
 		if (tmpMY > monsters[i].position.z) {
-			monsters[i].position.z += 1;
+			monsters[i].position.z += 4;
 		}
 		else if (tmpMY < monsters[i].position.z) {
-			monsters[i].position.z -= 1;
+			monsters[i].position.z -= 4;
 		}
-		//console.log(((0 - boardSize.x / 2) + (monsters[i].nextStep.x) * ((tileSize)/2) + tileSize) +' == ' + monsters[i].position.x);
 		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
 			// Calculate nextStep
 			monsters[i].setNodes();
-			console.log('hier');
+		}
+		if (monsters[i].currentStep.x == monsters[i].end.x && monsters[i].currentStep.y == monsters[i].end.y) {
+			deleteMonster(i, true);
 		}
 	}
 	renderer.render(scene, camera);
@@ -296,18 +309,35 @@ function spawnMonster(tile) {
 	monsters.push(monsterObject);
 }
 
-// @todo Caluclate grid X, Y with world X, Z position.
+/**
+ * Delete monster, remove life.
+ * @param index
+ * @param removeLife boolean
+ */
+function deleteMonster(index, removeLife) {
+	scene.remove(monsters[index]);
+	monsters.splice(index, 1);
+	if (removeLife == true) {
+		// remove life!
+	}
+}
+
+/**
+ * Convert X and Y to the position in the world back and forth.
+ */
 function calculateX(xPosition) {
-	
+	return Math.floor(0 - (((0 - basisX) - xPosition) / tileSize) - 1);
 }
 function calculateY(yPosition) {
+	return Math.floor(0 - (((0 - basisY) - yPosition) / tileSize) - 1);
 	
 }
-function calculateXposition(x) {
+function calculateXPosition(x) {
+	return 0 - basisX + (tileSize * (x+1));
 	
 }
-function calculateYposition(y) {
-	
+function calculateYPosition(y) {
+	return 0 - basisY + (tileSize * (y+1));
 }
 
 /**

@@ -12,7 +12,7 @@ boardSize.z = 512; // Depth, must be multiple of 2
  * @param int tileSize
  * The x and y size of a tile. Must be a multiple of 2. Also used for buildings.
  */
-var tileSize = 128;
+var tileSize = 64;
 
 /**
  * @param string detailLevel

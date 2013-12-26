@@ -35,7 +35,7 @@ var Monster = function(t) {
 		object = new t.Mesh(geometry, material);
 		object.position.set(this.position.x, this.position.y, this.position.z);
 		this.currentStep.x = 0;
-		this.currentStep.y = Math.round(this.position.z / tileSize) + 1; // use .z because this is the vertical tiles
+		this.currentStep.y = calculateY(this.position.z);
 		this.setNodes();
 	}
 	
@@ -48,10 +48,8 @@ var Monster = function(t) {
 			this.currentStep.y = this.nextStep.y;
 		}
 		if (this.end.x == undefined) {
-			this.end.x = (((this.position.x - 1 - (tileSize/2)) + (boardSize.x*1.5)) / tileSize) - 1;
-			this.end.y = ((this.position.z-1) / tileSize) + 1.5;
-			console.log(this.end.x);
-			console.log(this.end.y);
+			this.end.x = calculateX((boardSize.x/2));
+			this.end.y = calculateY(this.position.z);
 		}
 		// calculate next tile/step with a*
 		Graph.nodes = nodes;
