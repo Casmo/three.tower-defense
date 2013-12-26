@@ -85,7 +85,7 @@ function init() {
 	scene.add(sunLight);
 	sunLight.intensity = 2;
 	if (detailLevel == 'high') {
-		sunLight.shadowCameraVisible = true;
+		//sunLight.shadowCameraVisible = true;
 		sunLight.shadowDarkness = 0.70;
 		sunLight.castShadow = true;
 	}
@@ -245,6 +245,10 @@ function render() {
 			}
 		}
 	}
+	// Move monsters
+	for (i = 0; i < monsters.length; i++) {
+		
+	}
 	renderer.render(scene, camera);
 }
 
@@ -294,8 +298,8 @@ function spawnMonster(tile) {
 		monsterObject.castShadow = true;
 	}
 	scene.add(monsterObject);
+	// Get X and Y start and end
 	monsters.push(monster);
-	monster.move();
 }
 
 /**
@@ -320,22 +324,33 @@ function build(buildingIndex) {
 			if (detailLevel == 'high') {
 				building.castShadow = true;
 			}
-			scene.add(building);
-			towers[i] = building; // Push the new tower to the tower array
-			// make the node unwalkeble
-			nodes[tiles[i].x][tiles[i].y] = 0;
-			// @todo CHECK if maze is open else destroy last tower
+			nodes[tiles[i].x][tiles[i].y].type = 0;
+			if (isValidPath() == false) {
+				nodes[tiles[i].x][tiles[i].y].type = 1;
+				//	scene.remove(building);
+			}
+			else {
+				towers[i] = building; // Push the new tower to the tower array
+				scene.add(building);
+			}
 			hideBuildmenu();
 			return true;
 		}
 	}
 }
 
+function destroyLastTower() {
+	
+}
+
 // @todo add from and end
-function calculatePath() {
+function isValidPath() {
 	Graph.nodes = nodes;
-	var start = nodes[0][0];
-	var end = nodes[5][3];
-	var result = astar.search(Graph.nodes, start, end);
-	//alert(result);
+	start = nodes[0][0];
+	end = nodes[(boardSize.x / tileSize)-1][(boardSize.z / tileSize)-1];
+	result = astar.search(Graph.nodes, start, end);
+	if (result == '') {
+		return false;
+	}
+	return true;
 }

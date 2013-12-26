@@ -19,4 +19,4 @@ var tileSize = 128;
  * Set the detail of the level. Options are 'low', 'medium', 'high'.
  * Default value is low.
  */
-var detailLevel = 'high'; // Detail of the level 'low', 'medium', 'high'
+var detailLevel = 'low'; // Detail of the level 'low', 'medium', 'high'
