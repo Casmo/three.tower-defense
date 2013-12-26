@@ -247,7 +247,26 @@ function render() {
 	}
 	// Move monsters
 	for (i = 0; i < monsters.length; i++) {
-		
+		tmpMX = ((0 - boardSize.x / 2) + (monsters[i].nextStep.x) * ((tileSize)/2) + tileSize);
+		tmpMY = ((0 - boardSize.z / 2) + (monsters[i].nextStep.y) * ((tileSize)/2) + tileSize);
+		if (tmpMX > monsters[i].position.x) {
+			monsters[i].position.x += 1;
+		}
+		else if (tmpMX < monsters[i].position.x) {
+			monsters[i].position.x -= 1;
+		}
+		if (tmpMY > monsters[i].position.z) {
+			monsters[i].position.z += 1;
+		}
+		else if (tmpMY < monsters[i].position.z) {
+			monsters[i].position.z -= 1;
+		}
+		//console.log(((0 - boardSize.x / 2) + (monsters[i].nextStep.x) * ((tileSize)/2) + tileSize) +' == ' + monsters[i].position.x);
+		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
+			// Calculate nextStep
+			monsters[i].setNodes();
+			console.log('hier');
+		}
 	}
 	renderer.render(scene, camera);
 }
@@ -256,35 +275,6 @@ function animate() {
 	requestAnimationFrame(animate);
 	controls.update();
 	render();
-}
-
-/**
- * Callback when the player resizes the current browser window.
- */
-function onWindowResize() {
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-	renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-/**
- * Callback when the player clicks on the document.
- * @param object event the click event
- * @todo I would like to have this only activated when the player clicked UP & DOWN
- * on the tile instead of just UP or DOWN.
- */
-function onDocumentMouseDown(event) {
-    event.preventDefault();
-    var vector = new THREE.Vector3( 
-        (event.clientX / window.innerWidth) * 2 - 1, 
-        - (event.clientY / window.innerHeight) * 2 + 1, 
-        0.5);
-    projector.unprojectVector(vector, camera);
-    var ray = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
-    var intersects = ray.intersectObjects(tiles);
-    if (intersects.length > 0) {
-    	return intersects[0].object.callback();
-    }
 }
 
 function spawnMonster(tile) {
@@ -298,8 +288,12 @@ function spawnMonster(tile) {
 		monsterObject.castShadow = true;
 	}
 	scene.add(monsterObject);
+	monsterObject.end = monster.end;
+	monsterObject.currentStep = monster.currentStep;
+	monsterObject.nextStep = monster.nextStep;
+	monsterObject.setNodes = monster.setNodes;
 	// Get X and Y start and end
-	monsters.push(monster);
+	monsters.push(monsterObject);
 }
 
 /**
@@ -353,4 +347,33 @@ function isValidPath() {
 		return false;
 	}
 	return true;
+}
+
+/**
+ * Callback when the player resizes the current browser window.
+ */
+function onWindowResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+/**
+ * Callback when the player clicks on the document.
+ * @param object event the click event
+ * @todo I would like to have this only activated when the player clicked UP & DOWN
+ * on the tile instead of just UP or DOWN.
+ */
+function onDocumentMouseDown(event) {
+    event.preventDefault();
+    var vector = new THREE.Vector3( 
+        (event.clientX / window.innerWidth) * 2 - 1, 
+        - (event.clientY / window.innerHeight) * 2 + 1, 
+        0.5);
+    projector.unprojectVector(vector, camera);
+    var ray = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+    var intersects = ray.intersectObjects(tiles);
+    if (intersects.length > 0) {
+    	return intersects[0].object.callback();
+    }
 }

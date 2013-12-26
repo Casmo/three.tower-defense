@@ -34,6 +34,8 @@ var Monster = function(t) {
 		geometry = new t.SphereGeometry(this.size.x, this.size.y, this.size.z);
 		object = new t.Mesh(geometry, material);
 		object.position.set(this.position.x, this.position.y, this.position.z);
+		this.currentStep.x = 0;
+		this.currentStep.y = Math.round(this.position.z / tileSize) + 1; // use .z because this is the vertical tiles
 		this.setNodes();
 	}
 	
@@ -41,17 +43,25 @@ var Monster = function(t) {
 	 * Set the X,Y nodes for start and end for this monster
 	 */
 	this.setNodes = function() {
+		if (this.nextStep.x != undefined) {
+			this.currentStep.x = this.nextStep.x;
+			this.currentStep.y = this.nextStep.y;
+		}
 		if (this.end.x == undefined) {
 			this.end.x = (((this.position.x - 1 - (tileSize/2)) + (boardSize.x*1.5)) / tileSize) - 1;
 			this.end.y = ((this.position.z-1) / tileSize) + 1.5;
+			console.log(this.end.x);
+			console.log(this.end.y);
 		}
-		this.currentStep.x = 0;
-		this.currentStep.y = Math.round(this.position.z / tileSize) + 1; // use .z because this is the vertical tiles
 		// calculate next tile/step with a*
 		Graph.nodes = nodes;
 		start = nodes[this.currentStep.x][this.currentStep.y];
 		end = nodes[this.end.x][this.end.y];
 		result = astar.search(Graph.nodes, start, end);
+		if (result != '') {
+			this.nextStep.x = result[0].x;
+			this.nextStep.y = result[0].y;
+		}
 	}
 	
 	/**
