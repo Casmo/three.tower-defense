@@ -13,9 +13,11 @@ function showBuildmenu(tile) {
 		buildmenu.innerHTML += buildings[i].html;
 	}
 	buildmenu.style.display = 'block';
-	buildmenu.innerHTML += tile.x;
-	buildmenu.innerHTML += ', ';
-	buildmenu.innerHTML += tile.y;
+	if (devMode == true) {
+		buildmenu.innerHTML += tile.x;
+		buildmenu.innerHTML += ', ';
+		buildmenu.innerHTML += tile.y;
+	}
 }
 
 /**

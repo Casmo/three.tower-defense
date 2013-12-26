@@ -15,7 +15,7 @@ var skyBox = '';
 /**
  * @param array tiles
  * Tiles are the building platforms of the towers. Each tile hold information like
- * position, current tower, etc.
+ * position, current tower, accessable, etc.
  * When a player clicks on one of those tiles a new building menu will be showed and
  * allows player to build or upgrade a tower on this tile.
  */
@@ -55,7 +55,6 @@ animate();
  * Initial the game/demonstration
  */
 function init() {
-	// Basic initial of THREE
 	scene = new THREE.Scene();
 	renderer = new THREE.WebGLRenderer({antialias:true});
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -63,7 +62,6 @@ function init() {
 		renderer.shadowMapEnabled = true;
 	}
 	
-	// Add camera
 	camera = new THREE.PerspectiveCamera(
 		45,
 		window.innerWidth / window.innerHeight,
@@ -81,21 +79,22 @@ function init() {
 	window.addEventListener('resize', onWindowResize, false);
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
 	
-	// Camera controls (with mouse)
+	// Camera controls
 	controls = new THREE.OrbitControls(camera);
 	controls.addEventListener('change', render);
 	
-	// Light
+	// Lights
 	sunLight = new THREE.SpotLight(0xffff00);
 	sunLight.position.set(0 - boardSize.x, 512, 0);
 	scene.add(sunLight);
 	sunLight.intensity = 2;
+	if (devMode == true) {
+		sunLight.shadowCameraVisible = true;
+	}
 	if (detailLevel == 'high') {
-		//sunLight.shadowCameraVisible = true;
 		sunLight.shadowDarkness = 0.70;
 		sunLight.castShadow = true;
 	}
-	
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
 	
@@ -144,16 +143,10 @@ function init() {
 			nodes[x][y] = new GraphNode(x, y, 1);
 			
 			tile = new Tile(THREE);
-			
-			// Calculate the 3D position of the tile
-//			tile.position.x = 1 + (tileSize / 2) - (boardSize.x / 2) + (x * tileSize);
-//			tile.position.y = boardSize.y / 2;
-//			tile.position.z = 1 + (tileSize / 2) - (boardSize.z / 2) + (y * tileSize);
-
 			tile.position.x = calculateXPosition(x); // 1 + (tileSize / 2) - (boardSize.x / 2) + (x * tileSize);
 			tile.position.y = boardSize.y / 2;
 			tile.position.z = calculateYPosition(y); // 1 + (tileSize / 2) - (boardSize.z / 2) + (y * tileSize);
-			
+
 			// Make the tile a little smaller to fit nicely on the map
 			tile.size.x = tileSize - 4;
 			tile.size.z = tileSize - 4;
@@ -165,9 +158,13 @@ function init() {
 			else {
 				randomHeight = 4;
 			}
-			// The first and last row is used to spawn monsters.
-			if (x == 0 || x == (boardSize.x / tileSize) - 1) {
+			// The first row is to spawn monsters
+			if (x == 0) {
 				randomHeight = 22;
+				tile.texture = 'images/grass-moss.jpg';
+			}
+			if (x == (boardSize.x / tileSize) - 1) {
+				randomHeight = 2;
 				tile.texture = 'images/grass-moss.jpg';
 			}
 			tile.size.y = randomHeight;
@@ -179,8 +176,11 @@ function init() {
 			tiles[count].y = y;
 			tiles[count].size = tile.size;
 			
-			if (x == 0 || x == (boardSize.x / tileSize)-1) {
+			if (x == 0) {
 				tiles[count].callback = function() { return spawnMonster(this); }
+			}
+			else if (x == (boardSize.x / tileSize)-1) {
+				tiles[count].callback = function() { return; }
 			}
 			else {
 				tiles[count].callback = function() { return showBuildmenu(this); }
@@ -203,7 +203,6 @@ function init() {
 		directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
 		imageSuffix = ".png";
 		skyGeometry = new THREE.CubeGeometry(4096, 4096, 4096);	
-		
 		materialArray = [];
 		for (var i = 0; i < 6; i++)
 			materialArray.push( new THREE.MeshBasicMaterial({
@@ -226,7 +225,6 @@ function render() {
 		mars.rotation.y -= 0.0020;
 	}
 	if (detailLevel == 'high') {
-		
 		// Calculate skybox rotation and light rotation
 		sunLightTimer += 0.00014; // @todo finetune
 		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
@@ -255,10 +253,9 @@ function render() {
 			}
 		}
 	}
+	
 	// Move monsters
 	for (i = 0; i < monsters.length; i++) {
-		//tmpMX = ((0 - boardSize.x / 2) + (monsters[i].nextStep.x) * ((tileSize)/2) + tileSize);
-		//tmpMY = ((0 - boardSize.z / 2) + (monsters[i].nextStep.y) * ((tileSize)/2) + tileSize);
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
 		if (tmpMX > monsters[i].position.x) {
@@ -290,6 +287,10 @@ function animate() {
 	render();
 }
 
+/**
+ * Spawns a monster on a tile and push it into the monsters array
+ * @param Object tile the spawning tile
+ */
 function spawnMonster(tile) {
 	monster = new Monster(THREE);
 	monster.position.x = tile.position.x;
@@ -305,20 +306,19 @@ function spawnMonster(tile) {
 	monsterObject.currentStep = monster.currentStep;
 	monsterObject.nextStep = monster.nextStep;
 	monsterObject.setNodes = monster.setNodes;
-	// Get X and Y start and end
 	monsters.push(monsterObject);
 }
 
 /**
- * Delete monster, remove life.
- * @param index
- * @param removeLife boolean
+ * Despawn or kill a monster
+ * @param int index the global index in the monsters array
+ * @param removeLife boolean whether to remove a life of the scoreboard
  */
 function deleteMonster(index, removeLife) {
 	scene.remove(monsters[index]);
 	monsters.splice(index, 1);
 	if (removeLife == true) {
-		// remove life!
+		// @todo remove life!
 	}
 }
 
@@ -343,6 +343,7 @@ function calculateYPosition(y) {
 /**
  * Build a building on the selected tile
  * @param int buildingIndex the index of the building
+ * @todo check from individual monsters
  */
 function build(buildingIndex) {
 	if (buildings[buildingIndex] == undefined) {
@@ -365,10 +366,9 @@ function build(buildingIndex) {
 			nodes[tiles[i].x][tiles[i].y].type = 0;
 			if (isValidPath() == false) {
 				nodes[tiles[i].x][tiles[i].y].type = 1;
-				//	scene.remove(building);
 			}
 			else {
-				towers[i] = building; // Push the new tower to the tower array
+				towers[i] = building;
 				scene.add(building);
 			}
 			hideBuildmenu();
@@ -377,15 +377,30 @@ function build(buildingIndex) {
 	}
 }
 
-function destroyLastTower() {
-	
-}
-
-// @todo add from and end
-function isValidPath() {
+/**
+ * Check whether the maze is open or closed.
+ * @param int startX the starting X node
+ * @param int startY the starting Y nodes
+ * @param int endX the ending X nodes
+ * @param int endY the ending Y nodes
+ * @returns {Boolean} whether the maze is open or closed seen from above params.
+ */
+function isValidPath(startX, startY, endX, endY) {
+	if (typeof startX == 'undefined') {
+		startX = 0;
+	}
+	if (typeof startY == 'undefined') {
+		startY = 0;
+	}
+	if (typeof endX == 'undefined') {
+		endX = (boardSize.x / tileSize)-1;
+	}
+	if (typeof endY == 'undefined') {
+		endY = (boardSize.z / tileSize)-1;
+	}
 	Graph.nodes = nodes;
-	start = nodes[0][0];
-	end = nodes[(boardSize.x / tileSize)-1][(boardSize.z / tileSize)-1];
+	start = nodes[startX][startY];
+	end = nodes[endX][endY];
 	result = astar.search(Graph.nodes, start, end);
 	if (result == '') {
 		return false;
