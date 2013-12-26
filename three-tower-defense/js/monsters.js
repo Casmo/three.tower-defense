@@ -3,7 +3,7 @@
  */
 var Monster = function(t) {
 	
-	var object;
+	this.object;
 	this.texture = 'images/monster-001.jpg';
 	this.hp = 10;
 	this.speed = 10;
@@ -22,7 +22,7 @@ var Monster = function(t) {
 	this.end = new Object();
 	
 	/**
-	 * Creates the mesh for the planet
+	 * Creates the mesh for the monster
 	 */
 	this.create = function() {
 		texture = new t.ImageUtils.loadTexture(this.texture);
@@ -32,8 +32,8 @@ var Monster = function(t) {
 			}
 		);
 		geometry = new t.SphereGeometry(this.size.x, this.size.y, this.size.z);
-		object = new t.Mesh(geometry, material);
-		object.position.set(this.position.x, this.position.y, this.position.z);
+		this.object = new t.Mesh(geometry, material);
+		this.object.position.set(this.position.x, this.position.y, this.position.z);
 		this.currentStep.x = 0;
 		this.currentStep.y = calculateY(this.position.z);
 		this.setNodes();
@@ -67,7 +67,7 @@ var Monster = function(t) {
 	 * @param the scene object
 	 */
 	this.getObject = function() {
-		return object;
+		return this.object;
 	}
 	
 	return this;

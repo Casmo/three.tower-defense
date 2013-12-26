@@ -4,7 +4,7 @@
  * @author Mathieu de Ruiter (www.fellicht.nl)
  */
 
-var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300;
+var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300, monsterModels = new Array(), loader, manager;
 
 /**
  * @param object skyBox
@@ -48,8 +48,31 @@ var buildMenu;
 var basisX = (boardSize.x/2) + (tileSize/2);
 var basisY = (boardSize.z/2) + (tileSize/2);
 
-init();
-animate();
+preLoader();
+
+/**
+ * Load models before initial the game
+ */
+function preLoader() {
+	manager = new THREE.LoadingManager();
+
+	texture = new THREE.Texture();
+	loader = new THREE.ImageLoader(manager);
+	loader.load( 'files/models/monster-megatron.jpg', function ( image ) {
+		texture.image = image;
+		texture.needsUpdate = true;
+	} );
+	loader = new THREE.OBJLoader(manager);
+	loader.load('files/models/monster-megatron.obj', function ( object ) {
+		object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				child.material.map = texture;
+			}
+		} );
+		monsterModels.push(object);
+		init();
+	} );
+}
 
 /**
  * Initial the game/demonstration
@@ -217,6 +240,7 @@ function init() {
 	
 	projector = new THREE.Projector();
 	buildMenu = document.getElementById('buildmenu');
+	animate();
 }
 
 function render() {
