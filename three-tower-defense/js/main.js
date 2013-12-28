@@ -334,7 +334,7 @@ function render() {
 		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
 			// Calculate nextStep
 			monsters[i].setNodes();
-			activateTowers(monsters[i]);
+			activateTowers(i);
 		}
 		if (detailLevel == 'high') {
 			activeTimer = Date.now() * 0.005;
@@ -348,16 +348,15 @@ function render() {
 		if (tower.isShooting == true) {
 			if (typeof(tower.lastShootingTime) == 'undefined') {
 				tower.lastShootingTime = Date.now();
-				createBullet(tower, tower.shootingTarget);
+				createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex);
 			}
 			else if (((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
 				tower.lastShootingTime = Date.now();
-				createBullet(tower, tower.shootingTarget);
+				createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex);
 			}
 		}
 		towers[key] = tower;
 	});
-	// @todo make one smooth direction
 	for (i = 0; i < bullets.length; i++) {
 		bullets[i].position.x += bullets[i].speed.x;
 		bullets[i].position.y += bullets[i].speed.y;
@@ -365,49 +364,14 @@ function render() {
 		if ((bullets[i].end.x - bullets[i].position.x) < 6 &&
 				(bullets[i].end.y - bullets[i].position.y) < 6 &&
 				(bullets[i].end.z - bullets[i].position.z) < 6) {
+			if (monsters[bullets[i].targetIndex] != undefined) {
+				monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
+			}
+			if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
+				deleteMonster(bullets[i].targetIndex, false);
+			}
 			scene.remove(bullets[i]);
 			bullets.splice(i, 1);
-		}
-	}
-	if (1==2) {
-		for (i = 0; i < bullets.length; i++) {
-			moveX = bullets[i].end.x - bullets[i].position.x;
-			moveY = bullets[i].end.y - bullets[i].position.y;
-			moveZ = bullets[i].end.z - bullets[i].position.z;
-			longestRangeArray = new Array();
-			longestRangeArray = [moveX, moveY, moveZ];
-			longestRangeArray.sort(function(a,b){return b - a});
-			// Bullet Speed may be placed on the towers for a nicer detail
-			bulletSpeed = 4;
-			steps = longestRangeArray[0] / bulletSpeed;
-			if (moveX < 0) {
-				moveX = 0 + bulletSpeed;
-			}
-			else {
-				moveX = 0 - bulletSpeed;
-			}
-			if (moveY < 0) {
-				moveY = 0 + bulletSpeed;
-			}
-			else {
-				moveY = 0 - bulletSpeed;
-			}
-			if (moveZ < 0) {
-				moveZ = 0 + bulletSpeed;
-			}
-			else {
-				moveZ = 0 - bulletSpeed;
-			}
-			
-			bullets[i].position.x -= moveX;
-			bullets[i].position.y -= moveY;
-			bullets[i].position.z -= moveZ;
-			if ((bullets[i].end.x - bullets[i].position.x) < 6 &&
-					(bullets[i].end.y - bullets[i].position.y) < 6 &&
-					(bullets[i].end.z - bullets[i].position.z) < 6) {
-				scene.remove(bullets[i]);
-				bullets.splice(i, 1);
-			}
 		}
 	}
 	renderer.render(scene, camera);
@@ -433,13 +397,13 @@ function spawnMonster(tile) {
 	if (detailLevel == 'high') {
 		monsterObject.castShadow = true;
 	}
-	scene.add(monsterObject);
 	monsterObject.end = monster.end;
 	monsterObject.currentStep = monster.currentStep;
 	monsterObject.nextStep = monster.nextStep;
 	monsterObject.setNodes = monster.setNodes;
 	monsterObject.stats = monster.stats;
 	monsters.push(monsterObject);
+	scene.add(monsterObject);
 }
 
 /**
@@ -465,7 +429,8 @@ function deleteMonster(index, removeLife) {
  * Activate towers to shoot at this monster
  * @param Object monster
  */
-function activateTowers(monster) {
+function activateTowers(monsterIndex) {
+	monster = monsters[monsterIndex];
 	towers.forEach(function(tower) {
 		x = calculateX(tower.position.x);
 		y = calculateY(tower.position.z);
@@ -478,10 +443,12 @@ function activateTowers(monster) {
 		if (tower.isShooting == false && minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY) {
 			tower.isShooting = true;
 			tower.shootingTarget = monster;
+			tower.shootingTargetIndex = monsterIndex;
 		}
 		else if (tower.isShooting == true && tower.shootingTarget == monster && !(minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY)) {
 			tower.isShooting = false;
 			tower.shootingTarget = '';
+			tower.shootingTargetIndex = '';
 		}
 	});
 }
@@ -489,7 +456,7 @@ function activateTowers(monster) {
 /**
  * Create a bullet at the tower spot and move it to the monster.
  */
-function createBullet(tower, target) {
+function createBullet(tower, target, targetIndex) {
 	someBullet = tower.projectile;
 	someBullet.position.set(tower.position.x, (tower.position.y + tower.size.y), tower.position.z);
 	scene.add(someBullet);
@@ -500,8 +467,9 @@ function createBullet(tower, target) {
 	bulletSpeed = 6;
 	
 	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
-	console.log(speed);
 	someBullet.speed = speed;
+	someBullet.stats = tower.stats;
+	someBullet.targetIndex = targetIndex;
 	bullets.push(someBullet);
 }
 
@@ -561,9 +529,7 @@ function calculateBulletSpeed(startPosition, endPosition, speed) {
 	vector.z = endPosition.z - startPosition.z;
 	// (c) Pythagoras
 	distance = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-	//console.log(distance);
 	c = distance / speed;
-	console.log(c);
 	bulletSpeed.x = vector.x / c;
 	bulletSpeed.y = vector.y / c;
 	bulletSpeed.z = vector.z / c;
