@@ -252,7 +252,7 @@ function init() {
 		skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 		skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
 		skyBox.position.set(0, 1024, 0);
-	//	scene.add(skyBox);
+		scene.add(skyBox);
 	}
 	
 	projector = new THREE.Projector();
