@@ -20,6 +20,10 @@ buildings[0].mesh = function() {
 		buildingMaterial[0]
 	);
 }
+buildings[0].size = new Object();
+buildings[0].size.x = tileSize;
+buildings[0].size.y = tileSize;
+buildings[0].size.z = tileSize;
 buildings[0].stats = new Object();
 buildings[0].stats.speed = 10;
 buildings[0].stats.damage = 2;
@@ -39,6 +43,10 @@ buildings[1].mesh = function() {
 		buildingMaterial[1]
 	);
 }
+buildings[1].size = new Object();
+buildings[1].size.x = tileSize;
+buildings[1].size.y = tileSize;
+buildings[1].size.z = tileSize;
 buildings[1].stats = new Object();
 buildings[1].stats.speed = 20;
 buildings[1].stats.damage = 1;
@@ -58,6 +66,11 @@ buildings[2].mesh = function() {
 		buildingMaterial[2]
 	);
 }
+
+buildings[2].size = new Object();
+buildings[2].size.x = tileSize;
+buildings[2].size.y = tileSize;
+buildings[2].size.z = tileSize;
 buildings[2].stats = new Object();
 buildings[2].stats.speed = 50;
 buildings[2].stats.damage = 5;

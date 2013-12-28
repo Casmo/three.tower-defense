@@ -4,13 +4,20 @@
  * @author Mathieu de Ruiter (www.fellicht.nl)
  */
 
-var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300, monsterModels = new Array(), loader, manager;
+var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300, monsterModels = new Array(), loader, manager, rockBottom;
 
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
  */
 var skyBox = '';
+
+/**
+ * Score of the player
+ */
+var score = new Object();
+score.currency = 100;
+score.lives = 25;
 
 /**
  * @param array tiles
@@ -61,22 +68,23 @@ preLoader();
  */
 function preLoader() {
 	manager = new THREE.LoadingManager();
-
+	
 	texture = new THREE.Texture();
 	loader = new THREE.ImageLoader(manager);
-	loader.load( 'files/models/monster-megatron.jpg', function ( image ) {
+	loader.load( 'files/models/rock_bottom.jpg', function ( image ) {
 		texture.image = image;
 		texture.needsUpdate = true;
 	} );
 	loader = new THREE.OBJLoader(manager);
-	loader.load('files/models/monster-megatron.obj', function ( object ) {
+	loader.load('files/models/rock_bottom.obj', function ( object ) {
+
 		object.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh ) {
 				child.material.map = texture;
 			}
 		} );
-		monsterModels.push(object);
-		init();
+		rockBottom = object;
+		setTimeout("init();", 2000);
 	} );
 }
 
@@ -92,10 +100,10 @@ function init() {
 	}
 	
 	camera = new THREE.PerspectiveCamera(
-		45,
+		75,
 		window.innerWidth / window.innerHeight,
 		0.1,
-		10000
+		1000000
 	);
 	camera.position.x = 0;
 	camera.position.y = 512;
@@ -126,6 +134,8 @@ function init() {
 	}
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
+	rockBottom.position.set(0,0-(boardSize.y/2),0);
+	scene.add(rockBottom);
 	
 	// Create planets
 	planet = new Planet(THREE);
@@ -242,7 +252,7 @@ function init() {
 		skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 		skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
 		skyBox.position.set(0, 1024, 0);
-		scene.add(skyBox);
+	//	scene.add(skyBox);
 	}
 	
 	projector = new THREE.Projector();
@@ -257,13 +267,14 @@ function render() {
 	}
 	if (detailLevel == 'high') {
 		// Calculate skybox rotation and light rotation
-		sunLightTimer += 0.00014; // @todo finetune
+		sunLightTimer += 0.0014; // @todo finetune
 		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
 		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
 		skyBox.rotation.y += 0.00015;
 		
 		timer = Date.now() * 0.001;
 		floor.position.y = Math.sin(timer) * 16;
+		rockBottom.position.y = (Math.sin(timer) * 16) - (boardSize.y / 2);
 		for (i = 0; i < tiles.length; i++) {
 			tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
 			if (towers[i] != undefined) {
@@ -284,7 +295,6 @@ function render() {
 			}
 		}
 	}
-	
 	// Move monsters
 	for (i = 0; i < monsters.length; i++) {
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
@@ -349,35 +359,55 @@ function render() {
 	});
 	// @todo make one smooth direction
 	for (i = 0; i < bullets.length; i++) {
-		moveX = bullets[i].position.x - bullets[i].end.x;
-		moveY = bullets[i].position.y - bullets[i].end.y;
-		moveZ = bullets[i].position.z - bullets[i].end.z;
-		if (moveX < 0) {
-			moveX = -5;
-		}
-		else {
-			moveX = 5;
-		}
-		if (moveY < 0) {
-			moveY = -5;
-		}
-		else {
-			moveY = 5;
-		}
-		if (moveZ < 0) {
-			moveZ = -5;
-		}
-		else {
-			moveZ = 5;
-		}
-		bullets[i].position.x -= moveX;
-		bullets[i].position.y -= moveY;
-		bullets[i].position.z -= moveZ;
+		bullets[i].position.x += bullets[i].speed.x;
+		bullets[i].position.y += bullets[i].speed.y;
+		bullets[i].position.z += bullets[i].speed.z;
 		if ((bullets[i].end.x - bullets[i].position.x) < 6 &&
 				(bullets[i].end.y - bullets[i].position.y) < 6 &&
 				(bullets[i].end.z - bullets[i].position.z) < 6) {
 			scene.remove(bullets[i]);
 			bullets.splice(i, 1);
+		}
+	}
+	if (1==2) {
+		for (i = 0; i < bullets.length; i++) {
+			moveX = bullets[i].end.x - bullets[i].position.x;
+			moveY = bullets[i].end.y - bullets[i].position.y;
+			moveZ = bullets[i].end.z - bullets[i].position.z;
+			longestRangeArray = new Array();
+			longestRangeArray = [moveX, moveY, moveZ];
+			longestRangeArray.sort(function(a,b){return b - a});
+			// Bullet Speed may be placed on the towers for a nicer detail
+			bulletSpeed = 4;
+			steps = longestRangeArray[0] / bulletSpeed;
+			if (moveX < 0) {
+				moveX = 0 + bulletSpeed;
+			}
+			else {
+				moveX = 0 - bulletSpeed;
+			}
+			if (moveY < 0) {
+				moveY = 0 + bulletSpeed;
+			}
+			else {
+				moveY = 0 - bulletSpeed;
+			}
+			if (moveZ < 0) {
+				moveZ = 0 + bulletSpeed;
+			}
+			else {
+				moveZ = 0 - bulletSpeed;
+			}
+			
+			bullets[i].position.x -= moveX;
+			bullets[i].position.y -= moveY;
+			bullets[i].position.z -= moveZ;
+			if ((bullets[i].end.x - bullets[i].position.x) < 6 &&
+					(bullets[i].end.y - bullets[i].position.y) < 6 &&
+					(bullets[i].end.z - bullets[i].position.z) < 6) {
+				scene.remove(bullets[i]);
+				bullets.splice(i, 1);
+			}
 		}
 	}
 	renderer.render(scene, camera);
@@ -443,7 +473,7 @@ function activateTowers(monster) {
 			tower.isShooting = true;
 			tower.shootingTarget = monster;
 		}
-		else if (tower.isShooting == true && !(minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY) && tower.shootingTarget == monster) {
+		else if (tower.isShooting == true && tower.shootingTarget == monster && !(minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY)) {
 			tower.isShooting = false;
 			tower.shootingTarget = '';
 		}
@@ -455,31 +485,18 @@ function activateTowers(monster) {
  */
 function createBullet(tower, target) {
 	someBullet = tower.projectile;
-	someBullet.position.set(tower.position.x, tower.position.y, tower.position.z);
+	someBullet.position.set(tower.position.x, (tower.position.y + tower.size.y), tower.position.z);
 	scene.add(someBullet);
 	someBullet.end = new Object()
 	someBullet.end.x = target.position.x;
 	someBullet.end.y = target.position.y;
 	someBullet.end.z = target.position.z;
+	bulletSpeed = 6;
+	
+	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
+	console.log(speed);
+	someBullet.speed = speed;
 	bullets.push(someBullet);
-}
-
-/**
- * Convert X and Y to the position in the world back and forth.
- */
-function calculateX(xPosition) {
-	return Math.floor(0 - (((0 - basisX) - xPosition) / tileSize) - 1);
-}
-function calculateY(yPosition) {
-	return Math.floor(0 - (((0 - basisY) - yPosition) / tileSize) - 1);
-	
-}
-function calculateXPosition(x) {
-	return 0 - basisX + (tileSize * (x+1));
-	
-}
-function calculateYPosition(y) {
-	return 0 - basisY + (tileSize * (y+1));
 }
 
 /**
@@ -506,6 +523,7 @@ function build(buildingIndex) {
 			building.isShooting = false;
 			building.shootingTarget = '';
 			building.projectile = buildings[buildingIndex].projectile();
+			building.size = buildings[buildingIndex].size;
 			if (detailLevel == 'high') {
 				building.castShadow = true;
 			}
@@ -521,6 +539,47 @@ function build(buildingIndex) {
 			return true;
 		}
 	}
+}
+
+/**
+ * Calculate the travel speed (x, y, z) of a bullet
+ * @param object startPosition Holds the x, y and z position of the current position
+ * @param object endPosition Holds the x, y and z position of the target (end of the bullet)
+ * @param int speed the speed that the bullet will travel
+ */
+function calculateBulletSpeed(startPosition, endPosition, speed) {
+	bulletSpeed = new Object();
+	vector = new Object();
+	vector.x = endPosition.x - startPosition.x;
+	vector.y = endPosition.y - startPosition.y;
+	vector.z = endPosition.z - startPosition.z;
+	// (c) Pythagoras
+	distance = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+	//console.log(distance);
+	c = distance / speed;
+	console.log(c);
+	bulletSpeed.x = vector.x / c;
+	bulletSpeed.y = vector.y / c;
+	bulletSpeed.z = vector.z / c;
+	return bulletSpeed;
+}
+
+/**
+ * Convert X and Y to the position in the world back and forth.
+ */
+function calculateX(xPosition) {
+	return Math.floor(0 - (((0 - basisX) - xPosition) / tileSize) - 1);
+}
+function calculateY(yPosition) {
+	return Math.floor(0 - (((0 - basisY) - yPosition) / tileSize) - 1);
+	
+}
+function calculateXPosition(x) {
+	return 0 - basisX + (tileSize * (x+1));
+	
+}
+function calculateYPosition(y) {
+	return 0 - basisY + (tileSize * (y+1));
 }
 
 /**
