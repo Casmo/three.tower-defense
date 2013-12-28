@@ -20,6 +20,7 @@ var skyBox = '';
  * allows player to build or upgrade a tower on this tile.
  */
 var tiles = new Array();
+var tilesSizes = new Array(); // Same array as above except accessable by [x][y]
 var nodes = new Array(); // The path array for calculating shortest route [x][y]
 var Graph = new Graph([]);
 
@@ -35,6 +36,11 @@ var towers = new Array();
  * Monsters that has been spawned with the position and stats
  */
 var monsters = new Array();
+
+/**
+ * The bullets created by towers
+ */
+var bullets = new Array();
 
 /**
  * @param object buildmenu
@@ -162,6 +168,7 @@ function init() {
 	var count = 0;
 	for (var x = 0; x < (boardSize.x / tileSize); x++) {
 		nodes[x] = [];
+		tilesSizes[x] = [];
 		for (var y = 0; y < (boardSize.z / tileSize); y++) {
 			nodes[x][y] = new GraphNode(x, y, 1);
 			
@@ -198,7 +205,7 @@ function init() {
 			tiles[count].x = x;
 			tiles[count].y = y;
 			tiles[count].size = tile.size;
-			
+			tilesSizes[x][y] = tiles[count];
 			if (x == 0) {
 				tiles[count].callback = function() { return spawnMonster(this); }
 			}
@@ -283,23 +290,94 @@ function render() {
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
 		if (tmpMX > monsters[i].position.x) {
-			monsters[i].position.x += 4;
+			monsters[i].position.x += monsters[i].stats.speed;
+			if (detailLevel == 'high') {
+				monsters[i].rotation.x = 0;
+				monsters[i].rotation.y = 0;
+				monsters[i].rotation.z -= monsters[i].stats.speed / 25;
+			}
 		}
 		else if (tmpMX < monsters[i].position.x) {
-			monsters[i].position.x -= 4;
+			monsters[i].position.x -= monsters[i].stats.speed;
+			if (detailLevel == 'high') {
+				monsters[i].rotation.x = 0;
+				monsters[i].rotation.y = 0;
+				monsters[i].rotation.z += monsters[i].stats.speed / 25;
+			}
 		}
-		if (tmpMY > monsters[i].position.z) {
-			monsters[i].position.z += 4;
+		else if (tmpMY > monsters[i].position.z) {
+			monsters[i].position.z += monsters[i].stats.speed;
+			if (detailLevel == 'high') {
+				monsters[i].rotation.z = 0;
+				monsters[i].rotation.y = 0;
+				monsters[i].rotation.x += monsters[i].stats.speed / 25;
+			}
 		}
 		else if (tmpMY < monsters[i].position.z) {
-			monsters[i].position.z -= 4;
+			monsters[i].position.z -= monsters[i].stats.speed;
+			if (detailLevel == 'high') {
+				monsters[i].rotation.z = 0;
+				monsters[i].rotation.y = 0;
+				monsters[i].rotation.x -= monsters[i].stats.speed / 25;
+			}
 		}
 		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
 			// Calculate nextStep
 			monsters[i].setNodes();
+			activateTowers(monsters[i]);
+		}
+		if (detailLevel == 'high') {
+			activeTimer = Date.now() * 0.005;
+			monsters[i].position.y = tilesSizes[monsters[i].nextStep.x][monsters[i].nextStep.y].size.y + 32 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
 		}
 		if (monsters[i].currentStep.x == monsters[i].end.x && monsters[i].currentStep.y == monsters[i].end.y) {
 			deleteMonster(i, true);
+		}
+	} // rr.forEach(function (val, index, theArray) {
+	towers.forEach(function(tower, key, theArray) {
+		if (tower.isShooting == true) {
+			if (typeof(tower.lastShootingTime) == 'undefined') {
+				tower.lastShootingTime = Date.now();
+				createBullet(tower, tower.shootingTarget);
+			}
+			else if (((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
+				tower.lastShootingTime = Date.now();
+				createBullet(tower, tower.shootingTarget);
+			}
+		}
+		towers[key] = tower;
+	});
+	// @todo make one smooth direction
+	for (i = 0; i < bullets.length; i++) {
+		moveX = bullets[i].position.x - bullets[i].end.x;
+		moveY = bullets[i].position.y - bullets[i].end.y;
+		moveZ = bullets[i].position.z - bullets[i].end.z;
+		if (moveX < 0) {
+			moveX = -5;
+		}
+		else {
+			moveX = 5;
+		}
+		if (moveY < 0) {
+			moveY = -5;
+		}
+		else {
+			moveY = 5;
+		}
+		if (moveZ < 0) {
+			moveZ = -5;
+		}
+		else {
+			moveZ = 5;
+		}
+		bullets[i].position.x -= moveX;
+		bullets[i].position.y -= moveY;
+		bullets[i].position.z -= moveZ;
+		if ((bullets[i].end.x - bullets[i].position.x) < 6 &&
+				(bullets[i].end.y - bullets[i].position.y) < 6 &&
+				(bullets[i].end.z - bullets[i].position.z) < 6) {
+			scene.remove(bullets[i]);
+			bullets.splice(i, 1);
 		}
 	}
 	renderer.render(scene, camera);
@@ -330,6 +408,7 @@ function spawnMonster(tile) {
 	monsterObject.currentStep = monster.currentStep;
 	monsterObject.nextStep = monster.nextStep;
 	monsterObject.setNodes = monster.setNodes;
+	monsterObject.stats = monster.stats;
 	monsters.push(monsterObject);
 }
 
@@ -344,6 +423,45 @@ function deleteMonster(index, removeLife) {
 	if (removeLife == true) {
 		// @todo remove life!
 	}
+}
+
+/**
+ * Activate towers to shoot at this monster
+ * @param Object monster
+ */
+function activateTowers(monster) {
+	towers.forEach(function(tower) {
+		x = calculateX(tower.position.x);
+		y = calculateY(tower.position.z);
+		minX = x - tower.stats.range;
+		maxX = x + tower.stats.range;
+		minY = y - tower.stats.range;
+		maxY = y + tower.stats.range;
+		monsterX = calculateX(monster.position.x);
+		monsterY = calculateY(monster.position.z);
+		if (tower.isShooting == false && minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY) {
+			tower.isShooting = true;
+			tower.shootingTarget = monster;
+		}
+		else if (tower.isShooting == true && !(minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY) && tower.shootingTarget == monster) {
+			tower.isShooting = false;
+			tower.shootingTarget = '';
+		}
+	});
+}
+
+/**
+ * Create a bullet at the tower spot and move it to the monster.
+ */
+function createBullet(tower, target) {
+	someBullet = tower.projectile;
+	someBullet.position.set(tower.position.x, tower.position.y, tower.position.z);
+	scene.add(someBullet);
+	someBullet.end = new Object()
+	someBullet.end.x = target.position.x;
+	someBullet.end.y = target.position.y;
+	someBullet.end.z = target.position.z;
+	bullets.push(someBullet);
 }
 
 /**
@@ -384,6 +502,10 @@ function build(buildingIndex) {
 			building.position.x = tiles[i].position.x;
 			building.position.y = tiles[i].position.y + (tileSize / 2);
 			building.position.z = tiles[i].position.z;
+			building.stats = buildings[buildingIndex].stats;
+			building.isShooting = false;
+			building.shootingTarget = '';
+			building.projectile = buildings[buildingIndex].projectile();
 			if (detailLevel == 'high') {
 				building.castShadow = true;
 			}

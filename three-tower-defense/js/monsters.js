@@ -5,8 +5,9 @@ var Monster = function(t) {
 	
 	this.object;
 	this.texture = 'images/monster-001.jpg';
-	this.hp = 10;
-	this.speed = 10;
+	this.stats = new Object();
+	this.stats.hp = 10;
+	this.stats.speed = 1;
 	this.size = new Object();
 	this.size.x = 32;
 	this.size.y = 32;

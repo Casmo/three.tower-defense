@@ -2,7 +2,10 @@
  * @param Object buildingMaterial
  * Default THREE material for the buildings.
  */
-var buildingMaterial = new THREE.MeshBasicMaterial({color: 0xff9900});
+var buildingMaterial = new Array();
+buildingMaterial[0] = new THREE.MeshBasicMaterial({color: 0xff9900});
+buildingMaterial[1] = new THREE.MeshBasicMaterial({color: 0x99ff00});
+buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x00ff99});
 /**
  * @param array buildings
  * Available buildings to build
@@ -14,23 +17,55 @@ buildings[0].html = '<img src="images/towers/001.png" class="building" onclick="
 buildings[0].mesh = function() {
 	return new THREE.Mesh(
 		new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
-		buildingMaterial
+		buildingMaterial[0]
+	);
+}
+buildings[0].stats = new Object();
+buildings[0].stats.speed = 10;
+buildings[0].stats.damage = 2;
+buildings[0].stats.range = 1;
+buildings[0].projectile = function() {
+	return new THREE.Mesh(
+		new THREE.SphereGeometry((tileSize/10), 16, 16),
+		buildingMaterial[0]
 	);
 }
 // circle
 buildings[1] = new Object();
 buildings[1].html = '<img src="images/towers/002.png" class="building" onclick="build(1);" />';
-buildings[1].mesh = function() { return new THREE.Mesh(
+buildings[1].mesh = function() {
+	return new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/2), 16, 16),
-		buildingMaterial
+		buildingMaterial[1]
+	);
+}
+buildings[1].stats = new Object();
+buildings[1].stats.speed = 20;
+buildings[1].stats.damage = 1;
+buildings[1].stats.range = 1;
+buildings[1].projectile = function() {
+	return new THREE.Mesh(
+		new THREE.SphereGeometry((tileSize/10), 16, 16),
+		buildingMaterial[1]
 	);
 }
 // square
 buildings[2] = new Object();
 buildings[2].html = '<img src="images/towers/003.png" class="building" onclick="build(2);" />';
-buildings[2].mesh = function() { return new THREE.Mesh(
+buildings[2].mesh = function() {
+	return new THREE.Mesh(
 		new THREE.CubeGeometry(tileSize-16, tileSize, tileSize-16),
-		buildingMaterial
+		buildingMaterial[2]
+	);
+}
+buildings[2].stats = new Object();
+buildings[2].stats.speed = 50;
+buildings[2].stats.damage = 5;
+buildings[2].stats.range = 2;
+buildings[2].projectile = function() {
+	return new THREE.Mesh(
+		new THREE.SphereGeometry((tileSize/10), 16, 16),
+		buildingMaterial[2]
 	);
 }
 
