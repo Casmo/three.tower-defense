@@ -267,7 +267,7 @@ function render() {
 	}
 	if (detailLevel == 'high') {
 		// Calculate skybox rotation and light rotation
-		sunLightTimer += 0.0014; // @todo finetune
+		sunLightTimer += 0.00014; // @todo finetune
 		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
 		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
 		skyBox.rotation.y += 0.00015;
@@ -448,11 +448,17 @@ function spawnMonster(tile) {
  * @param removeLife boolean whether to remove a life of the scoreboard
  */
 function deleteMonster(index, removeLife) {
-	scene.remove(monsters[index]);
-	monsters.splice(index, 1);
 	if (removeLife == true) {
 		// @todo remove life!
 	}
+	towers.forEach(function(tower) {
+		if (tower.shootingTarget == monsters[index]) {
+			tower.isShooting = false;
+			tower.shootingTarget = '';
+		}
+	});
+	scene.remove(monsters[index]);
+	monsters.splice(index, 1);
 }
 
 /**
