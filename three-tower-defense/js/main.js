@@ -4,7 +4,7 @@
  * @author Mathieu de Ruiter (www.fellicht.nl)
  */
 
-var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300, monsterModels = new Array(), loader, manager, rockBottom;
+var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300, monsterModels = new Array(), loader, manager, rockBottom, explosions = new Array(), particleCount = 100;
 
 /**
  * @param object skyBox
@@ -16,7 +16,7 @@ var skyBox = '';
  * Score of the player
  */
 var score = new Object();
-score.currency = 100;
+score.currency = 20;
 score.lives = 25;
 
 /**
@@ -92,6 +92,8 @@ function preLoader() {
  * Initial the game/demonstration
  */
 function init() {
+	document.getElementById('lives').innerHTML = score.lives;
+	updateCurrency();
 	scene = new THREE.Scene();
 	renderer = new THREE.WebGLRenderer({antialias:true});
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -100,7 +102,7 @@ function init() {
 	}
 	
 	camera = new THREE.PerspectiveCamera(
-		75,
+		45,
 		window.innerWidth / window.innerHeight,
 		0.1,
 		1000000
@@ -183,9 +185,9 @@ function init() {
 			nodes[x][y] = new GraphNode(x, y, 1);
 			
 			tile = new Tile(THREE);
-			tile.position.x = calculateXPosition(x); // 1 + (tileSize / 2) - (boardSize.x / 2) + (x * tileSize);
+			tile.position.x = calculateXPosition(x);
 			tile.position.y = boardSize.y / 2;
-			tile.position.z = calculateYPosition(y); // 1 + (tileSize / 2) - (boardSize.z / 2) + (y * tileSize);
+			tile.position.z = calculateYPosition(y);
 
 			// Make the tile a little smaller to fit nicely on the map
 			tile.size.x = tileSize - 4;
@@ -343,7 +345,7 @@ function render() {
 		if (monsters[i].currentStep.x == monsters[i].end.x && monsters[i].currentStep.y == monsters[i].end.y) {
 			deleteMonster(i, true);
 		}
-	} // rr.forEach(function (val, index, theArray) {
+	}
 	towers.forEach(function(tower, key, theArray) {
 		if (tower.isShooting == true) {
 			if (typeof(tower.lastShootingTime) == 'undefined') {
@@ -374,6 +376,30 @@ function render() {
 			bullets.splice(i, 1);
 		}
 	}
+	for (i = 0; i < explosions.length; i++) {
+		removeParticleSystem = false;
+		for (p = 0; p < particleCount; p++) {
+			oldParticle = explosions[i].geometry.vertices[p];
+			particle = new THREE.Vector3(oldParticle.x + oldParticle.speed.x, oldParticle.y + oldParticle.speed.y, oldParticle.z + oldParticle.speed.z);
+			particle.speed = new Object();
+			particle.speed.x = oldParticle.speed.x * 0.97;
+			particle.speed.y = oldParticle.speed.y * 0.97;
+			particle.speed.z = oldParticle.speed.z * 0.97;
+			explosions[i].geometry.vertices[p] = particle;
+			//particle.addSelf(particle.position);
+			if(particle.speed.x < 0.01 && particle.speed.x > -0.01 && particle.speed.y < 0.01 && particle.speed.y > -0.01 && particle.speed.z < 0.01 && particle.speed.z > -0.01) {
+				removeParticleSystem = true;
+			}
+		}
+		explosions[i].geometry.__dirtyVertices = true;
+		explosions[i].geometry.dynamic = true;
+		explosions[i].geometry.verticesNeedUpdate = true;
+		explosions[i].geometry.normalsNeedUpdate = true;
+		if (removeParticleSystem == true) {
+			scene.remove(explosions[i]);
+			explosions.splice(i, 1);
+		}
+	}
 	renderer.render(scene, camera);
 }
 
@@ -388,6 +414,9 @@ function animate() {
  * @param Object tile the spawning tile
  */
 function spawnMonster(tile) {
+	if (score.lives <= 0) {
+		return false;
+	}
 	monster = new Monster(THREE);
 	monster.position.x = tile.position.x;
 	monster.position.y = tile.position.y + monster.size.y + tile.size.y;
@@ -413,7 +442,25 @@ function spawnMonster(tile) {
  */
 function deleteMonster(index, removeLife) {
 	if (removeLife == true) {
-		// @todo remove life!
+		score.lives--;
+		if (score.lives < 0) {
+			score.lives = 0;
+			towers.forEach(function(tower, key, theArray) {
+				scene.remove(towers[key]);
+				delete towers[key];
+			});
+			for (i = 0; i < bullets.length; i++) {
+				scene.remove(bullets[i]);
+				bullets.splice(i, 1);
+			}
+		}
+		document.getElementById('lives').innerHTML = score.lives;
+	}
+	else {
+		// killed, add currency
+		score.currency += monsters[index].stats.currency;
+		updateCurrency();
+		createExplosion(monsters[index].position);
 	}
 	towers.forEach(function(tower) {
 		if (tower.shootingTarget == monsters[index]) {
@@ -479,7 +526,7 @@ function createBullet(tower, target, targetIndex) {
  * @todo check from individual monsters
  */
 function build(buildingIndex) {
-	if (buildings[buildingIndex] == undefined) {
+	if (score.lives <= 0 || buildings[buildingIndex] == undefined) {
 		return false;
 	}
 	for (i = 0; i < tiles.length; i++) {
@@ -488,6 +535,9 @@ function build(buildingIndex) {
 				// @todo UPGRADE tower
 				hideBuildmenu();
 				return true;
+			}
+			if ((score.currency - buildings[buildingIndex].costs) < 0) {
+				return false;
 			}
 			building = buildings[buildingIndex].mesh();
 			building.position.x = tiles[i].position.x;
@@ -508,11 +558,41 @@ function build(buildingIndex) {
 			else {
 				towers[i] = building;
 				scene.add(building);
+				score.currency -= buildings[buildingIndex].costs;
+				updateCurrency();
 			}
 			hideBuildmenu();
 			return true;
 		}
 	}
+}
+
+function createExplosion(position) {
+	
+	particles = new THREE.Geometry();
+	pMaterial = new THREE.ParticleBasicMaterial({
+		color: 0xFF0000,
+		size: 10
+    });
+	for (var p = 0; p < particleCount; p++) {
+		  pX = position.x + (Math.random() * 20 - 10);
+	      pY = position.y + (Math.random() * 20 - 10);
+	      pZ = position.z + (Math.random() * 20 - 10);
+	      speed = new Object();
+	      speed.x = Math.random() * 4 - 2;
+	      speed.y = Math.random() * 4 - 2;
+	      speed.z = Math.random() * 4 - 2;
+	      particle = new THREE.Vector3(pX, pY, pZ);
+	      particle.speed = speed;
+	      particles.vertices.push(particle);
+	}
+	particleSystem = new THREE.ParticleSystem(
+	    particles,
+	    pMaterial
+    );
+	particleSystem.sortParticles = true;
+	explosions.push(particleSystem);
+	scene.add(explosions[explosions.length-1]);
 }
 
 /**
@@ -583,6 +663,10 @@ function isValidPath(startX, startY, endX, endY) {
 		return false;
 	}
 	return true;
+}
+
+function updateCurrency() {
+	document.getElementById('currency').innerHTML = score.currency;
 }
 
 /**
