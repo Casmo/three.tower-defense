@@ -4,7 +4,10 @@
  * @author Mathieu de Ruiter (www.fellicht.nl)
  */
 
-var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300, monsterModels = new Array(), loader, manager, rockBottom, explosions = new Array(), particleCount = 100;
+var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
+	monsterModels = new Array(), loader, manager, rockBottom,
+	explosions = new Array(), particleCount = 100, currentWave = 0,
+	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0;
 
 /**
  * @param object skyBox
@@ -219,7 +222,7 @@ function init() {
 			tiles[count].size = tile.size;
 			tilesSizes[x][y] = tiles[count];
 			if (x == 0) {
-				tiles[count].callback = function() { return spawnMonster(this); }
+				tiles[count].callback = function() { if (devMode == true) { spawnMonster(this); } else { return; } }
 			}
 			else if (x == (boardSize.x / tileSize)-1) {
 				tiles[count].callback = function() { return; }
@@ -400,6 +403,11 @@ function render() {
 			explosions.splice(i, 1);
 		}
 	}
+	spawningMonstersTime = ((new Date().getTime() / 1000) - waveTimer);
+	if (spawningMonstersTime > waveSeconds) {
+		spawnWave();
+	}
+	document.getElementById('spawn-timer').innerHTML = 'Next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
 	renderer.render(scene, camera);
 }
 
@@ -417,6 +425,7 @@ function spawnMonster(tile) {
 	if (score.lives <= 0) {
 		return false;
 	}
+	console.log(tile);
 	monster = new Monster(THREE);
 	monster.position.x = tile.position.x;
 	monster.position.y = tile.position.y + monster.size.y + tile.size.y;
@@ -556,6 +565,7 @@ function build(buildingIndex) {
 				nodes[tiles[i].x][tiles[i].y].type = 1;
 			}
 			else {
+				building.receiveShadow = true;
 				towers[i] = building;
 				scene.add(building);
 				score.currency -= buildings[buildingIndex].costs;
@@ -571,7 +581,7 @@ function createExplosion(position) {
 	
 	particles = new THREE.Geometry();
 	pMaterial = new THREE.ParticleBasicMaterial({
-		color: 0xFF0000,
+		color: 0xFFFFFF,
 		size: 10
     });
 	for (var p = 0; p < particleCount; p++) {
