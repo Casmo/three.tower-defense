@@ -8,7 +8,7 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 100, currentWave = 0,
 	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0;
-
+var blabla = '0';
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -111,8 +111,8 @@ function init() {
 		1000000
 	);
 	camera.position.x = 0;
-	camera.position.y = 512;
-	camera.position.z = 512;
+	camera.position.y = (window.innerWidth/2);
+	camera.position.z = (window.innerHeight/2) + (window.innerHeight/2*1.5);
 	camera.lookAt(scene.position);
 	scene.add(camera);
 	document.body.appendChild(renderer.domElement);
@@ -297,6 +297,9 @@ function render() {
 			}
 			else {
 				tiles[i].rotation.y = 0;
+				if (towers[i] != undefined) {
+					towers[i].rotation.y = 0;
+				}
 			}
 		}
 	}
@@ -368,40 +371,30 @@ function render() {
 		bullets[i].position.x += bullets[i].speed.x;
 		bullets[i].position.y += bullets[i].speed.y;
 		bullets[i].position.z += bullets[i].speed.z;
-		if ((bullets[i].end.x - bullets[i].position.x) < 6 &&
-				(bullets[i].end.y - bullets[i].position.y) < 6 &&
-				(bullets[i].end.z - bullets[i].position.z) < 6) {
-			if (monsters[bullets[i].targetIndex] != undefined) {
-				console.log('monster '+ bullets[i].targetIndex +' HP: '+ monsters[bullets[i].targetIndex].stats.hp);
-				monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
+		bullets[i].lifeTime--;
+//		if (
+//				(bullets[i].end.x - bullets[i].position.x) < 6 &&
+//				(bullets[i].end.y - bullets[i].position.y) < 6 &&
+//				(bullets[i].end.z - bullets[i].position.z) < 6)
+//		{
+		if (monsters[bullets[i].targetIndex] == undefined) {
+			delete bullets[i];
+		}
+		else {
+			var ray = new THREE.Ray(bullets[i].position, new THREE.Vector3(monsters[bullets[i].targetIndex].position.x, monsters[bullets[i].targetIndex].position.y, monsters[bullets[i].targetIndex].position.z).normalize() );
+			distance = ray.distanceToPoint(monsters[bullets[i].targetIndex].position);
+			if (distance <= 15|| distance >= 200) {
+				if (monsters[bullets[i].targetIndex] != undefined) {
+					monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
+				}
+				if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
+					deleteMonster(bullets[i].targetIndex, false);
+				}
+				scene.remove(bullets[i]);
+				delete bullets[i]; // bullets.splice(i, 1);
 			}
-			if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
-				deleteMonster(bullets[i].targetIndex, false);
-			}
-			scene.remove(bullets[i]);
-			delete bullets[i]; // bullets.splice(i, 1);
 		}
 	});
-	/*
-	for (i = 0; i < bullets.length; i++) {
-		bullets[i].position.x += bullets[i].speed.x;
-		bullets[i].position.y += bullets[i].speed.y;
-		bullets[i].position.z += bullets[i].speed.z;
-		if ((bullets[i].end.x - bullets[i].position.x) < 6 &&
-				(bullets[i].end.y - bullets[i].position.y) < 6 &&
-				(bullets[i].end.z - bullets[i].position.z) < 6) {
-			if (monsters[bullets[i].targetIndex] != undefined) {
-				console.log(monsters[bullets[i].targetIndex].stats.hp);
-				monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
-			}
-			if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
-				deleteMonster(bullets[i].targetIndex, false);
-			}
-			scene.remove(bullets[i]);
-			delete bullets[i]; // bullets.splice(i, 1);
-		}
-	}
-	*/
 	for (i = 0; i < explosions.length; i++) {
 		removeParticleSystem = false;
 		for (p = 0; p < particleCount; p++) {
@@ -412,7 +405,6 @@ function render() {
 			particle.speed.y = oldParticle.speed.y * 0.97;
 			particle.speed.z = oldParticle.speed.z * 0.97;
 			explosions[i].geometry.vertices[p] = particle;
-			//particle.addSelf(particle.position);
 			if(particle.speed.x < 0.01 && particle.speed.x > -0.01 && particle.speed.y < 0.01 && particle.speed.y > -0.01 && particle.speed.z < 0.01 && particle.speed.z > -0.01) {
 				removeParticleSystem = true;
 			}
@@ -490,6 +482,7 @@ function deleteMonster(index, removeLife) {
 			score.lives = 0;
 			towers.forEach(function(tower, key, theArray) {
 				scene.remove(towers[key]);
+				createExplosion(towers[key].position);
 				delete towers[key];
 			});
 			for (i = 0; i < bullets.length; i++) {
@@ -555,7 +548,7 @@ function createBullet(tower, target, targetIndex) {
 	someBullet.end.y = monsters[targetIndex].position.y;
 	someBullet.end.z = monsters[targetIndex].position.z;
 	bulletSpeed = 6;
-	
+	someBullet.lifeTime = 25;
 	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
 	someBullet.speed = speed;
 	someBullet.stats = tower.stats;

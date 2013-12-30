@@ -21,9 +21,9 @@ function spawnWave() {
 	if (someStats.speed > 10) {
 		someStats.speed = 10;
 	}
-	someStats.currency = Math.ceil(currentWave * 0.4);
-	if (someStats.currency > 8) {
-		someStats.currency = 8;
+	someStats.currency = Math.ceil(currentWave * 0.3);
+	if (someStats.currency > 4) {
+		someStats.currency = 4;
 	}
 	timePerMonsterInSeconds = (waveSeconds / maxMonsters) / 3;
 	for (i = 0; i < maxMonsters; i++) {

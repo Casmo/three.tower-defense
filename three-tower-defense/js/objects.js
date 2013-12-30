@@ -26,9 +26,9 @@ buildings[0].size.y = tileSize;
 buildings[0].size.z = tileSize;
 buildings[0].costs = 10;
 buildings[0].stats = new Object();
-buildings[0].stats.speed = 12.5;
+buildings[0].stats.speed = 12;
 buildings[0].stats.damage = 5;
-buildings[0].stats.range = 3;
+buildings[0].stats.range = 2;
 buildings[0].projectile = function() {
 	return new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/10), 16, 16),
