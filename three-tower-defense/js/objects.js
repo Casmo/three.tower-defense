@@ -13,7 +13,7 @@ buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x00ff99});
 var buildings = new Array();
 // triangle
 buildings[0] = new Object();
-buildings[0].html = '<img src="images/towers/001.png" class="building" onclick="build(0);" />';
+buildings[0].html = '<img src="images/towers/001.png" class="building" onclick="return build(0);" />';
 buildings[0].mesh = function() {
 	return new THREE.Mesh(
 		new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
@@ -26,8 +26,8 @@ buildings[0].size.y = tileSize;
 buildings[0].size.z = tileSize;
 buildings[0].costs = 10;
 buildings[0].stats = new Object();
-buildings[0].stats.speed = 10;
-buildings[0].stats.damage = 2.5;
+buildings[0].stats.speed = 12.5;
+buildings[0].stats.damage = 5;
 buildings[0].stats.range = 3;
 buildings[0].projectile = function() {
 	return new THREE.Mesh(
@@ -37,7 +37,7 @@ buildings[0].projectile = function() {
 }
 // circle
 buildings[1] = new Object();
-buildings[1].html = '<img src="images/towers/002.png" class="building" onclick="build(1);" />';
+buildings[1].html = '<img src="images/towers/002.png" class="building" onclick="return build(1);" />';
 buildings[1].mesh = function() {
 	return new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/2), 16, 16),
@@ -48,11 +48,11 @@ buildings[1].size = new Object();
 buildings[1].size.x = tileSize;
 buildings[1].size.y = tileSize;
 buildings[1].size.z = tileSize;
-buildings[1].costs = 5;
+buildings[1].costs = 25;
 buildings[1].stats = new Object();
-buildings[1].stats.speed = 50;
-buildings[1].stats.damage = 1.25;
-buildings[1].stats.range = 3;
+buildings[1].stats.speed = 20;
+buildings[1].stats.damage = 7;
+buildings[1].stats.range = 1;
 buildings[1].projectile = function() {
 	return new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/10), 16, 16),
@@ -61,7 +61,7 @@ buildings[1].projectile = function() {
 }
 // square
 buildings[2] = new Object();
-buildings[2].html = '<img src="images/towers/003.png" class="building" onclick="build(2);" />';
+buildings[2].html = '<img src="images/towers/003.png" class="building" onclick="return build(2);" />';
 buildings[2].mesh = function() {
 	return new THREE.Mesh(
 		new THREE.CubeGeometry(tileSize-16, tileSize, tileSize-16),
@@ -73,11 +73,11 @@ buildings[2].size = new Object();
 buildings[2].size.x = tileSize;
 buildings[2].size.y = tileSize;
 buildings[2].size.z = tileSize;
-buildings[2].costs = 1;
+buildings[2].costs = 5;
 buildings[2].stats = new Object();
 buildings[2].stats.speed = 25;
-buildings[2].stats.damage = 1;
-buildings[2].stats.range = 5;
+buildings[2].stats.damage = 1.75;
+buildings[2].stats.range = 3;
 buildings[2].projectile = function() {
 	return new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/10), 16, 16),

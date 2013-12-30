@@ -19,7 +19,7 @@ var skyBox = '';
  * Score of the player
  */
 var score = new Object();
-score.currency = 10;
+score.currency = 20;
 score.lives = 25;
 
 /**
@@ -338,7 +338,7 @@ function render() {
 			}
 		}
 		// @todo fix correct position check
-		if (calculateX(tmpMX) == calculateX(monsters[i].position.x) && calculateY(tmpMY) == calculateY(monsters[i].position.z)) {
+		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
 			// Calculate nextStep
 			monsters[i].setNodes();
 			activateTowers(i);
@@ -609,6 +609,7 @@ function build(buildingIndex) {
 			return true;
 		}
 	}
+	return false;
 }
 
 function createExplosion(position) {

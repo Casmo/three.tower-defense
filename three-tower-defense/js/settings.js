@@ -4,9 +4,9 @@
  * 2.
  */
 var boardSize = new Object();
-boardSize.x = 768; // Width, must be multiple of 2
+boardSize.x = 832; // Width, must be multiple of 2
 boardSize.y = 64; // Height
-boardSize.z = 512; // Depth, must be multiple of 2
+boardSize.z = 576; // Depth, must be multiple of 2
 
 /**
  * @param int tileSize
@@ -19,7 +19,7 @@ var tileSize = 64;
  * Set the detail of the level. Options are 'low', 'medium', 'high'.
  * Default value is low.
  */
-var detailLevel = 'medium'; // Detail of the level 'low', 'medium', 'high'
+var detailLevel = 'high'; // Detail of the level 'low', 'medium', 'high'
 
 /**
  * @param boolean devMode

@@ -13,12 +13,18 @@ function spawnWave() {
 		maxMonsters = 50;
 	}
 	someStats = new Object();
-	someStats.hp = Math.round((currentWave+1) * 8.9);
+	someStats.hp = Math.round((currentWave+1) * 4.8);
+	if (someStats.hp > 400) {
+		someStats.hp = 400;
+	}
 	someStats.speed = 1;
 	if (someStats.speed > 10) {
 		someStats.speed = 10;
 	}
-	someStats.currency = Math.round(currentWave * 0.8);
+	someStats.currency = Math.ceil(currentWave * 0.4);
+	if (someStats.currency > 8) {
+		someStats.currency = 8;
+	}
 	timePerMonsterInSeconds = (waveSeconds / maxMonsters) / 3;
 	for (i = 0; i < maxMonsters; i++) {
 		timeOut = timeOut + (timePerMonsterInSeconds * 1000);
