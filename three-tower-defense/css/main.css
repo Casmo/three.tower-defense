@@ -27,11 +27,11 @@ canvas { width: 100%; height: 100%; }
 .ui #spawn-timer {
 	position: absolute;
 	left: 50%;
-	width: 300px;
+	width: 400px;
 	font-size: 22px;
 	font-weight: bold;
 	color: #fff;
-	margin-left: -150px;
+	margin-left: -200px;
 	top: 10px;
 }
 .ui #lives, .ui #currency {
