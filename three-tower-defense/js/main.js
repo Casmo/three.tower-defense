@@ -377,13 +377,15 @@ function render() {
 //				(bullets[i].end.y - bullets[i].position.y) < 6 &&
 //				(bullets[i].end.z - bullets[i].position.z) < 6)
 //		{
-		if (monsters[bullets[i].targetIndex] == undefined) {
+		if (monsters[bullets[i].targetIndex] == undefined || bullets[i].lifeTime <= 0 || 
+			(bullets[i].speed.x == 0 && bullets[i].speed.y == 0 && bullets[i].speed.z == 0)
+		) {
 			delete bullets[i];
 		}
 		else {
 			var ray = new THREE.Ray(bullets[i].position, new THREE.Vector3(monsters[bullets[i].targetIndex].position.x, monsters[bullets[i].targetIndex].position.y, monsters[bullets[i].targetIndex].position.z).normalize() );
 			distance = ray.distanceToPoint(monsters[bullets[i].targetIndex].position);
-			if (distance <= 15|| distance >= 200) {
+			if (distance <= 15 || distance >= 200) {
 				if (monsters[bullets[i].targetIndex] != undefined) {
 					monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
 				}
@@ -548,7 +550,7 @@ function createBullet(tower, target, targetIndex) {
 	someBullet.end.y = monsters[targetIndex].position.y;
 	someBullet.end.z = monsters[targetIndex].position.z;
 	bulletSpeed = 6;
-	someBullet.lifeTime = 25;
+	someBullet.lifeTime = 50;
 	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
 	someBullet.speed = speed;
 	someBullet.stats = tower.stats;
