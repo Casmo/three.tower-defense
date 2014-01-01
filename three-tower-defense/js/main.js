@@ -386,6 +386,7 @@ function render() {
 		if (monsters[bullets[i].targetIndex] == undefined || bullets[i].lifeTime <= 0 || 
 			(bullets[i].speed.x == 0 && bullets[i].speed.y == 0 && bullets[i].speed.z == 0)
 		) {
+			scene.remove(bullets[i]);
 			delete bullets[i];
 		}
 		else {
