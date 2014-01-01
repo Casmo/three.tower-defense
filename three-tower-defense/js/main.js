@@ -665,6 +665,7 @@ function destroyTower(index) {
 		scene.remove(towers[index]);
 		createExplosion(towers[index].position);
 		delete towers[index];
+		nodes[tiles[index].x][tiles[index].y].type = 1;
 	}
 }
 
