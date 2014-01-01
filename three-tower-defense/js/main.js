@@ -270,20 +270,23 @@ function render() {
 		moon.rotation.y += 0.0015;
 		mars.rotation.y -= 0.0020;
 	}
-	if (detailLevel == 'high') {
-		// Calculate skybox rotation and light rotation
-		sunLightTimer += 0.00014; // @todo finetune
-		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
-		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
-		skyBox.rotation.y += 0.00015;
+	if (detailLevel == 'high' || detailLevel == 'medium') {
 		
-		timer = Date.now() * 0.001;
-		floor.position.y = Math.sin(timer) * 16;
-		rockBottom.position.y = (Math.sin(timer) * 16) - (boardSize.y / 2);
+		if (detailLevel == 'high') {
+			sunLightTimer += 0.00014; // @todo finetune
+			sunLight.position.z = Math.cos(sunLightTimer) * 1024;
+			sunLight.position.x = Math.sin(sunLightTimer) * 1024;
+			skyBox.rotation.y += 0.00015;
+			timer = Date.now() * 0.001;
+			floor.position.y = Math.sin(timer) * 16;
+			rockBottom.position.y = (Math.sin(timer) * 16) - (boardSize.y / 2);
+		}
 		for (i = 0; i < tiles.length; i++) {
-			tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
-			if (towers[i] != undefined) {
-				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+			if (detailLevel == 'high') {
+				tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
+				if (towers[i] != undefined) {
+					towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+				}
 			}
 			if (tiles[i].selected != undefined && tiles[i].selected == true) {
 				tiles[i].rotation.y += 0.008;
@@ -299,6 +302,9 @@ function render() {
 				tiles[i].rotation.y = 0;
 				if (towers[i] != undefined) {
 					towers[i].rotation.y = 0;
+				}
+				if (detailLevel == 'medium') {
+					tiles[i].position.y = (boardSize.y / 2);
 				}
 			}
 		}
@@ -647,7 +653,7 @@ function calculateBulletSpeed(startPosition, endPosition, speed) {
 	vector.z = endPosition.z - startPosition.z;
 	// (c) Pythagoras
 	distance = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-	c = (distance / speed * 2);
+	c = (distance / speed) / 2;
 	bulletSpeed.x = vector.x / c;
 	bulletSpeed.y = vector.y / c;
 	bulletSpeed.z = vector.z / c;
@@ -655,7 +661,6 @@ function calculateBulletSpeed(startPosition, endPosition, speed) {
 }
 
 function destroyTower(index) {
-	console.log(index);
 	if (towers[index] != undefined) {
 		scene.remove(towers[index]);
 		createExplosion(towers[index].position);
