@@ -13,3 +13,11 @@ Problems?
 If you have problems running the game place the folder in the webroot of your webserver and open the index.html in Chrome or Firefox.
 
 You can also open the /js/settings.js and lower the details for slower PCs.
+
+Features?
+===================
+
+* A* algorithm for monster path calculation;
+* Waves;
+* Different towers;
+* Full 3D;
