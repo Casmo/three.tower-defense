@@ -8,7 +8,6 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 100, currentWave = 0,
 	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0;
-var blabla = '0';
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -20,7 +19,7 @@ var skyBox = '';
  */
 var score = new Object();
 score.currency = 20;
-score.lives = 25;
+score.lives = 20;
 
 /**
  * @param array tiles
@@ -649,7 +648,7 @@ function calculateBulletSpeed(startPosition, endPosition, speed) {
 	vector.z = endPosition.z - startPosition.z;
 	// (c) Pythagoras
 	distance = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-	c = distance / speed;
+	c = (distance / speed * 2);
 	bulletSpeed.x = vector.x / c;
 	bulletSpeed.y = vector.y / c;
 	bulletSpeed.z = vector.z / c;
