@@ -18,7 +18,7 @@ var skyBox = '';
  * Score of the player
  */
 var score = new Object();
-score.currency = 20;
+score.currency = 25;
 score.lives = 20;
 
 /**
@@ -288,6 +288,11 @@ function render() {
 					towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
 				}
 			}
+			else {
+				if (towers[i] != undefined && tiles[i].selected != true) {
+					towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+				}
+			}
 			if (tiles[i].selected != undefined && tiles[i].selected == true) {
 				tiles[i].rotation.y += 0.008;
 				activeTimer = Date.now() * 0.005;
@@ -378,11 +383,6 @@ function render() {
 		bullets[i].position.y += bullets[i].speed.y;
 		bullets[i].position.z += bullets[i].speed.z;
 		bullets[i].lifeTime--;
-//		if (
-//				(bullets[i].end.x - bullets[i].position.x) < 6 &&
-//				(bullets[i].end.y - bullets[i].position.y) < 6 &&
-//				(bullets[i].end.z - bullets[i].position.z) < 6)
-//		{
 		if (monsters[bullets[i].targetIndex] == undefined || bullets[i].lifeTime <= 0 || 
 			(bullets[i].speed.x == 0 && bullets[i].speed.y == 0 && bullets[i].speed.z == 0)
 		) {
