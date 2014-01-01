@@ -12,12 +12,16 @@ function showBuildmenu(tile) {
 	for (i = 0; i < buildings.length; i++) {
 		buildmenu.innerHTML += buildings[i].html;
 	}
-	buildmenu.style.display = 'block';
+	if (towers[tile.index] != undefined) {
+		// Delete option
+		buildmenu.innerHTML += '<img src="images/towers/destroy.png" class="building" onclick="destroyTower(' + tile.index + ');deselectTiles();" />';
+	}
 	if (devMode == true) {
 		buildmenu.innerHTML += tile.x;
 		buildmenu.innerHTML += ', ';
 		buildmenu.innerHTML += tile.y;
 	}
+	buildmenu.style.display = 'block';
 }
 
 /**

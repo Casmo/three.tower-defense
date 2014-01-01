@@ -227,6 +227,7 @@ function init() {
 				tiles[count].callback = function() { return; }
 			}
 			else {
+				indexCount = count;
 				tiles[count].callback = function() { return showBuildmenu(this); }
 			}
 			tiles[count].height = randomHeight;
@@ -235,8 +236,8 @@ function init() {
 				tiles[count].castShadow = true;
 				tiles[count].receiveShadow = true;
 			}
+			tiles[count].index = count;
 			scene.add(tiles[count]);
-
 			count++;
 		}
 	}
@@ -482,9 +483,7 @@ function deleteMonster(index, removeLife) {
 		if (score.lives < 0) {
 			score.lives = 0;
 			towers.forEach(function(tower, key, theArray) {
-				scene.remove(towers[key]);
-				createExplosion(towers[key].position);
-				delete towers[key];
+				destroyTower(key);
 			});
 			for (i = 0; i < bullets.length; i++) {
 				scene.remove(bullets[i]);
@@ -653,6 +652,15 @@ function calculateBulletSpeed(startPosition, endPosition, speed) {
 	bulletSpeed.y = vector.y / c;
 	bulletSpeed.z = vector.z / c;
 	return bulletSpeed;
+}
+
+function destroyTower(index) {
+	console.log(index);
+	if (towers[index] != undefined) {
+		scene.remove(towers[index]);
+		createExplosion(towers[index].position);
+		delete towers[index];
+	}
 }
 
 /**
