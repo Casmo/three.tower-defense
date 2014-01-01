@@ -14,7 +14,7 @@ function showBuildmenu(tile) {
 	}
 	if (towers[tile.index] != undefined) {
 		// Delete option
-		buildmenu.innerHTML += '<img src="images/towers/destroy.png" class="building" onclick="destroyTower(' + tile.index + ');deselectTiles();" />';
+		buildmenu.innerHTML += '<img src="images/towers/destroy.png" class="building" onclick="destroyTower(' + tile.index + ');deselectTiles();hideBuildmenu();" />';
 	}
 	if (devMode == true) {
 		buildmenu.innerHTML += tile.x;
