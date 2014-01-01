@@ -7,7 +7,8 @@
 var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 100, currentWave = 0,
-	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0;
+	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0,
+	coins = new Array();
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -427,6 +428,18 @@ function render() {
 			explosions.splice(i, 1);
 		}
 	}
+	coins.forEach(function(coin, index) {
+		positionY = coins[index].lifeTime - 10;
+		positionY = Math.round(positionY*100)/100;
+		console.log(positionY);
+		coins[index].position.y += positionY;
+		coins[index].rotation.y += 0.1;
+		coins[index].lifeTime--;
+		if (coins[index].lifeTime <= -5) {
+			scene.remove(coins[index]);
+			delete coins[index];
+		}
+	});
 	spawningMonstersTime = ((new Date().getTime() / 1000) - waveTimer);
 	if (spawningMonstersTime > waveSeconds) {
 		spawnWave();
@@ -504,6 +517,7 @@ function deleteMonster(index, removeLife) {
 		score.currency += monsters[index].stats.currency;
 		updateCurrency();
 		createExplosion(monsters[index].position);
+		createCoin(monsters[index].position);
 	}
 	towers.forEach(function(tower) {
 		if (tower.shootingTargetIndex == index) {
@@ -612,8 +626,11 @@ function build(buildingIndex) {
 	return false;
 }
 
+/**
+ * Creates a particle explosion after killing a monster or destroying a tower.
+ * @param object position The x, y, z position of the explosion
+ */
 function createExplosion(position) {
-	
 	particles = new THREE.Geometry();
 	pMaterial = new THREE.ParticleBasicMaterial({
 		color: 0xFFFFFF,
@@ -638,6 +655,24 @@ function createExplosion(position) {
 	particleSystem.sortParticles = true;
 	explosions.push(particleSystem);
 	scene.add(explosions[explosions.length-1]);
+}
+
+/**
+ * Creates a coin and animate it in th render().
+ * @param object position The x, y, z position of the coin
+ */
+function createCoin(position) {
+	coinMaterial = new THREE.MeshBasicMaterial({color: 0xfffc00});
+	coin = new THREE.Mesh( 
+			// radiusAtTop, radiusAtBottom, height, segmentsAroundRadius, segmentsAlongHeight,
+			new THREE.CylinderGeometry(16, 16, 4, 20, 4), 
+			coinMaterial);
+	coin.position.set(position.x, position.y, position.z);
+	coin.rotation.z = 67.5;
+	coin.rotation.y = Math.random() * 360;
+	coin.lifeTime = 30;
+	coins.push(coin);
+	scene.add(coins[(coins.length-1)]);
 }
 
 /**
