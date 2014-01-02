@@ -70,25 +70,29 @@ preLoader();
  * Load models before initial the game
  */
 function preLoader() {
-	manager = new THREE.LoadingManager();
-	
-	texture = new THREE.Texture();
-	loader = new THREE.ImageLoader(manager);
-	loader.load( 'files/models/rock_bottom.jpg', function ( image ) {
-		texture.image = image;
-		texture.needsUpdate = true;
-	} );
-	loader = new THREE.OBJLoader(manager);
-	loader.load('files/models/rock_bottom.obj', function ( object ) {
-
-		object.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh ) {
-				child.material.map = texture;
-			}
+	if (detailLevel == 'low') {
+		init();
+	}
+	else {
+		manager = new THREE.LoadingManager();
+		texture = new THREE.Texture();
+		loader = new THREE.ImageLoader(manager);
+		loader.load( 'files/models/rock_bottom.jpg', function ( image ) {
+			texture.image = image;
+			texture.needsUpdate = true;
 		} );
-		rockBottom = object;
-		setTimeout("init();", 2000);
-	} );
+		loader = new THREE.OBJLoader(manager);
+		loader.load('files/models/rock_bottom.obj', function ( object ) {
+	
+			object.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh ) {
+					child.material.map = texture;
+				}
+			} );
+			rockBottom = object;
+			setTimeout("init();", 2000);
+		} );
+	}
 }
 
 /**
@@ -139,8 +143,10 @@ function init() {
 	}
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
-	rockBottom.position.set(0,0-(boardSize.y/2),0);
-	scene.add(rockBottom);
+	if (detailLevel != 'low') {
+		rockBottom.position.set(0,0-(boardSize.y/2),0);
+		scene.add(rockBottom);
+	}
 	
 	// Create planets
 	planet = new Planet(THREE);
@@ -272,7 +278,6 @@ function render() {
 		moon.rotation.y += 0.0015;
 		mars.rotation.y -= 0.0020;
 	}
-	if (detailLevel == 'high' || detailLevel == 'medium') {
 		
 		if (detailLevel == 'high') {
 			sunLightTimer += 0.00014; // @todo finetune
@@ -310,12 +315,11 @@ function render() {
 				if (towers[i] != undefined) {
 					towers[i].rotation.y = 0;
 				}
-				if (detailLevel == 'medium') {
+				if (detailLevel == 'medium' || detailLevel == 'low') {
 					tiles[i].position.y = (boardSize.y / 2);
 				}
 			}
 		}
-	}
 	// Move monsters
 	//for (i = 0; i < monsters.length; i++) {
 	monsters.forEach(function(monster, i, theArray) {
@@ -377,8 +381,8 @@ function render() {
 				tower.lastShootingTime = Date.now();
 				createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex);
 			}
+			towers[key] = tower;
 		}
-		towers[key] = tower;
 	});
 	bullets.forEach(function(bullet, i, theArray) {
 		bullets[i].position.x += bullets[i].speed.x;
@@ -446,7 +450,7 @@ function render() {
 			spawnWave();
 		}
 		if (score.lives > 0) {
-			document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave+1) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
+			document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
 		}
 	}
 	renderer.render(scene, camera);
@@ -459,8 +463,9 @@ function animate() {
 }
 
 function startGame() {
-	waveTimer = (new Date().getTime() / 1000) - 10;
+	currentWave = 0;
 	gameStarted = true;
+	spawnWave();
 }
 
 /**
