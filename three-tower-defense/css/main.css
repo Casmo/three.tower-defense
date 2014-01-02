@@ -1,12 +1,45 @@
 * { margin: 0px; padding: 0px; }
-body { overflow: hidden; font-size: arial, verdana, sans, sans-serif; color: #3f0909; font-size: 14px; }
+body { overflow: hidden; font-size: arial, verdana, sans, sans-serif; color: #a26412; font-size: 14px; }
 canvas { width: 100%; height: 100%; }
 a { text-decoration: none; color: #f90; }
 a:hover { color: #fff; }
+.top-nav, #game, .bottom-nav {
+    width: 100%;
+	position: absolute;
+	z-index: 1;
+}
+a.start-game {
+	color: #000;
+	font-size: 18px;
+	font-weight: bold;
+	border: 3px solid #a26412;
+	border-radius: 5px;
+	background-color: rgba(0,0,0,0.1);
+	padding: 5px;
+}
+a.start-game:hover {
+	background-color: rgba(100,100,100,0.1);
+}
+.top-nav, .bottom-nav {
+    height: 56px;
+	z-index: 2;
+	background-image: url(../images/background.png);
+}
+.top-nav {
+	top: 0px;
+	border-bottom: 5px solid #a26412;
+}
+.bottom-nav {
+	bottom: 0px;
+    border-top: 5px solid #a26412;
+}
+#game {
+	height: auto;
+	background-color: #000;
+}
 #buildmenu {
 	display: none;
     position: absolute;
-    bottom: 10px;
     z-index: 100;
     text-align: center;
     width: 50%;
@@ -26,7 +59,8 @@ a:hover { color: #fff; }
 	left: 0px;
 	width: 100%;
 }
-.ui #spawn-timer {
+#spawn-timer {
+	text-align: center;
 	position: absolute;
 	left: 50%;
 	width: 400px;
@@ -36,33 +70,34 @@ a:hover { color: #fff; }
 	margin-left: -200px;
 	top: 10px;
 }
-.ui #lives, .ui #currency {
-	position: absolute;
-	right: 10px;
-	top: 10px;
-	height: 54px;
-	width: 55px;
+#lives, #currency {
+	display: inline-block;
+	margin-left: 10px;
+	margin-top: 10px;
+	position: relative;
+	height: 36px;
 	font-weight: bold;
-	padding-left: 16px;
-	padding-top: 17px;
-	line-height: 56px;
+	line-height: 36px;
 	font-size: 22px;
-	text-align: center;
+	text-left: center;
+	padding-left: 46px;
+	min-width: 150px;
 	background-repeat: no-repeat;
 	background-image: url(../images/ui-lives.png);
 }
-.ui #currency {
-    left: 10px;
+#currency {
     background-image: url(../images/ui-currency.png);
 }
 
 #info-box {
 	display: none;
 	position: absolute;
-	bottom: 10px;
-	right: 10px;
+	width: 250px;
+	left: 50%;
+	margin-left: -125px;
+	bottom: 66px;
 	padding: 10px;
-	background-color: rgba(255,255,255,0.8);
-	border: 5px solid rgba(255,255,255,0.2);
+    background-image: url(../images/background.png);
+	border: 5px solid #a26412;
 	
 }

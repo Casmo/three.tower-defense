@@ -110,9 +110,9 @@ function init() {
 		0.1,
 		1000000
 	);
-	camera.position.x = 0;
-	camera.position.y = (window.innerWidth/2);
-	camera.position.z = (window.innerHeight/2) + (window.innerHeight/2*1.5);
+	camera.position.x = 128;
+	camera.position.y = boardSize.z;
+	camera.position.z = boardSize.z * 2;
 	camera.lookAt(scene.position);
 	scene.add(camera);
 	document.body.appendChild(renderer.domElement);
@@ -126,7 +126,7 @@ function init() {
 	controls.addEventListener('change', render);
 	
 	// Lights
-	sunLight = new THREE.SpotLight(0xffff00);
+	sunLight = new THREE.SpotLight(0xffffff);
 	sunLight.position.set(0 - boardSize.x, 512, 0);
 	scene.add(sunLight);
 	sunLight.intensity = 2;
@@ -264,7 +264,7 @@ function init() {
 	projector = new THREE.Projector();
 	buildMenu = document.getElementById('buildmenu');
 	animate();
-	document.getElementById('spawn-timer').innerHTML = 'Get ready for the ultimate survival! Click <a href="#top" onclick="startGame();">here</a> when ready!';
+	document.getElementById('spawn-timer').innerHTML = '<a href="#top" class="start-game" onclick="startGame();">Start game</a>';
 }
 
 function render() {
@@ -445,7 +445,9 @@ function render() {
 		if (spawningMonstersTime > waveSeconds) {
 			spawnWave();
 		}
-		document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave+1) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
+		if (score.lives > 0) {
+			document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave+1) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
+		}
 	}
 	renderer.render(scene, camera);
 }
@@ -457,7 +459,7 @@ function animate() {
 }
 
 function startGame() {
-	waveTimer = new Date().getTime() / 1000;
+	waveTimer = (new Date().getTime() / 1000) - 10;
 	gameStarted = true;
 }
 
@@ -507,7 +509,7 @@ function spawnMonster(tile, extraStats) {
 function deleteMonster(index, removeLife) {
 	if (removeLife == true) {
 		score.lives--;
-		if (score.lives < 0) {
+		if (score.lives <= 0) {
 			score.lives = 0;
 			towers.forEach(function(tower, key, theArray) {
 				destroyTower(key);
@@ -575,7 +577,7 @@ function createBullet(tower, target, targetIndex) {
 	someBullet.end.x = monsters[targetIndex].position.x;
 	someBullet.end.y = monsters[targetIndex].position.y;
 	someBullet.end.z = monsters[targetIndex].position.z;
-	bulletSpeed = 6;
+	bulletSpeed = 8;
 	someBullet.lifeTime = 50;
 	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
 	someBullet.speed = speed;
@@ -792,6 +794,7 @@ function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
+	console.log(camera.position);
 }
 
 /**
