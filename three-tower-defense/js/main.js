@@ -8,7 +8,7 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 100, currentWave = 0,
 	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0,
-	coins = new Array();
+	coins = new Array(), gameStarted = false;
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -244,7 +244,7 @@ function init() {
 	}
 	
 	// Skybox
-	if (detailLevel == 'high') {
+	if (detailLevel == 'high' || detailLevel == 'medium') {
 		imagePrefix = "images/skybox/stars-";
 		directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
 		imageSuffix = ".png";
@@ -264,6 +264,7 @@ function init() {
 	projector = new THREE.Projector();
 	buildMenu = document.getElementById('buildmenu');
 	animate();
+	document.getElementById('spawn-timer').innerHTML = 'Get ready for the ultimate survival! Click <a href="#top" onclick="startGame();">here</a> when ready!';
 }
 
 function render() {
@@ -431,7 +432,6 @@ function render() {
 	coins.forEach(function(coin, index) {
 		positionY = coins[index].lifeTime - 10;
 		positionY = Math.round(positionY*100)/100;
-		console.log(positionY);
 		coins[index].position.y += positionY;
 		coins[index].rotation.y += 0.1;
 		coins[index].lifeTime--;
@@ -440,11 +440,13 @@ function render() {
 			delete coins[index];
 		}
 	});
-	spawningMonstersTime = ((new Date().getTime() / 1000) - waveTimer);
-	if (spawningMonstersTime > waveSeconds) {
-		spawnWave();
+	if (gameStarted == true) {
+		spawningMonstersTime = ((new Date().getTime() / 1000) - waveTimer);
+		if (spawningMonstersTime > waveSeconds) {
+			spawnWave();
+		}
+		document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave+1) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
 	}
-	document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave+1) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
 	renderer.render(scene, camera);
 }
 
@@ -452,6 +454,11 @@ function animate() {
 	requestAnimationFrame(animate);
 	controls.update();
 	render();
+}
+
+function startGame() {
+	waveTimer = new Date().getTime() / 1000;
+	gameStarted = true;
 }
 
 /**

@@ -24,9 +24,9 @@ buildings[0].size = new Object();
 buildings[0].size.x = tileSize;
 buildings[0].size.y = tileSize;
 buildings[0].size.z = tileSize;
-buildings[0].costs = 10;
+buildings[0].costs = 12;
 buildings[0].stats = new Object();
-buildings[0].stats.speed = 15;
+buildings[0].stats.speed = 10;
 buildings[0].stats.damage = 5;
 buildings[0].stats.range = 2;
 buildings[0].projectile = function() {
@@ -48,14 +48,14 @@ buildings[1].size = new Object();
 buildings[1].size.x = tileSize;
 buildings[1].size.y = tileSize;
 buildings[1].size.z = tileSize;
-buildings[1].costs = 25;
+buildings[1].costs = 30;
 buildings[1].stats = new Object();
 buildings[1].stats.speed = 30;
-buildings[1].stats.damage = 13;
-buildings[1].stats.range = 10;
+buildings[1].stats.damage = 16;
+buildings[1].stats.range = 8;
 buildings[1].projectile = function() {
 	return new THREE.Mesh(
-		new THREE.SphereGeometry((tileSize/10), 16, 16),
+		new THREE.SphereGeometry((tileSize/7), 16, 16),
 		buildingMaterial[1]
 	);
 }
@@ -73,14 +73,14 @@ buildings[2].size = new Object();
 buildings[2].size.x = tileSize;
 buildings[2].size.y = tileSize;
 buildings[2].size.z = tileSize;
-buildings[2].costs = 4;
+buildings[2].costs = 3;
 buildings[2].stats = new Object();
 buildings[2].stats.speed = 20;
-buildings[2].stats.damage = 1.75;
+buildings[2].stats.damage = 2.75;
 buildings[2].stats.range = 3;
 buildings[2].projectile = function() {
 	return new THREE.Mesh(
-		new THREE.SphereGeometry((tileSize/10), 16, 16),
+		new THREE.SphereGeometry((tileSize/15), 16, 16),
 		buildingMaterial[2]
 	);
 }
