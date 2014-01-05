@@ -51,8 +51,8 @@ buildings[1].size.z = tileSize;
 buildings[1].costs = 30;
 buildings[1].stats = new Object();
 buildings[1].stats.speed = 20;
-buildings[1].stats.damage = 22;
-buildings[1].stats.range = 8;
+buildings[1].stats.damage = 26;
+buildings[1].stats.range = 6;
 buildings[1].projectile = function() {
 	return new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/7), 16, 16),

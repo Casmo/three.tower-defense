@@ -361,7 +361,7 @@ function render() {
 		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
 			// Calculate nextStep
 			monsters[i].setNodes();
-			activateTowers(i);
+			activateTowers(i); // @TODO fix towers on tower level not monster level
 		}
 		if (detailLevel == 'high') {
 			activeTimer = Date.now() * 0.005;
@@ -372,42 +372,37 @@ function render() {
 		}
 	});
 	towers.forEach(function(tower, key, theArray) {
-		if (tower.isShooting == true) {
-			if (typeof(tower.lastShootingTime) == 'undefined') {
-				tower.lastShootingTime = Date.now();
-				createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex);
-			}
-			else if (((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
-				tower.lastShootingTime = Date.now();
-				createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex);
-			}
-			towers[key] = tower;
-		}
+		shootAtMonsterInRange(tower, key);
 	});
 	bullets.forEach(function(bullet, i, theArray) {
-		bullets[i].position.x += bullets[i].speed.x;
-		bullets[i].position.y += bullets[i].speed.y;
-		bullets[i].position.z += bullets[i].speed.z;
+		bullets[i].position.x += bullet.speed.x;
+		bullets[i].position.y += bullet.speed.y;
+		bullets[i].position.z += bullet.speed.z;
 		bullets[i].lifeTime--;
-		if (monsters[bullets[i].targetIndex] == undefined || bullets[i].lifeTime <= 0 || 
-			(bullets[i].speed.x == 0 && bullets[i].speed.y == 0 && bullets[i].speed.z == 0)
-		) {
-			scene.remove(bullets[i]);
-			delete bullets[i];
-		}
-		else {
-			var ray = new THREE.Ray(bullets[i].position, new THREE.Vector3(monsters[bullets[i].targetIndex].position.x, monsters[bullets[i].targetIndex].position.y, monsters[bullets[i].targetIndex].position.z).normalize() );
-			distance = ray.distanceToPoint(monsters[bullets[i].targetIndex].position);
-			if (distance <= 15 || distance >= 200) {
+
+		if (monsters[bullets[i].targetIndex] != undefined) {
+			vector = new Object();
+			vector.x = monsters[bullets[i].targetIndex].position.x - bullets[i].position.x;
+			vector.y = monsters[bullets[i].targetIndex].position.y - bullets[i].position.y;
+			vector.z = monsters[bullets[i].targetIndex].position.z - bullets[i].position.z;
+			
+			distance = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+			if (distance <= 32 || distance >= (boardSize.x + boardSize.y)) {
 				if (monsters[bullets[i].targetIndex] != undefined) {
 					monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
 				}
 				if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
 					deleteMonster(bullets[i].targetIndex, false);
 				}
+				towers[bullet.towerIndex].hasBullet = false;
 				scene.remove(bullets[i]);
-				delete bullets[i]; // bullets.splice(i, 1);
+				delete bullets[i];
 			}
+		}
+		else if(bullets[i].lifeTime <= 0) {
+			towers[bullet.towerIndex].hasBullet = false;
+			scene.remove(bullets[i]);
+			delete bullets[i];
 		}
 	});
 	for (i = 0; i < explosions.length; i++) {
@@ -449,8 +444,11 @@ function render() {
 		if (spawningMonstersTime > waveSeconds) {
 			spawnWave();
 		}
-		if (score.lives > 0) {
+		if (currentWave <= 25 && score.lives > 0) {
 			document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
+		}
+		else if (currentWave <= 25 && score.lives <= 0) {
+			document.getElementById('spawn-timer').innerHTML = 'You did not survive. Try again!';
 		}
 	}
 	renderer.render(scene, camera);
@@ -546,10 +544,11 @@ function deleteMonster(index, removeLife) {
 /**
  * Activate towers to shoot at this monster
  * @param Object monster
+ * @deprecated don't use. Use shootAtMonsterInRange instead.
  */
 function activateTowers(monsterIndex) {
 	monster = monsters[monsterIndex];
-	towers.forEach(function(tower) {
+	towers.forEach(function(tower, index) {
 		x = calculateX(tower.position.x);
 		y = calculateY(tower.position.z);
 		minX = x - tower.stats.range;
@@ -560,35 +559,135 @@ function activateTowers(monsterIndex) {
 		monsterY = calculateY(monster.position.z);
 		if (tower.isShooting == false && minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY) {
 			tower.isShooting = true;
+			tower.hasBullet = false;
 			tower.shootingTarget = monster;
 			tower.shootingTargetIndex = monsterIndex;
 		}
 		else if (tower.isShooting == true && tower.shootingTargetIndex == monsterIndex && !(minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY)) {
 			tower.isShooting = false;
+			tower.hasBullet = false;
 			tower.shootingTarget = '';
 			tower.shootingTargetIndex = '';
 		}
+		else if(tower.lastShootingTime != undefined && (Date.now() - tower.lastShootingTime) > 3000) {
+			tower.isShooting = false;
+			tower.hasBullet = false;
+			tower.shootingTarget = '';
+			tower.shootingTargetIndex = '';
+		}
+		towers[index] = tower;
 	});
+}
+
+/**
+ * Shoot at a monster in the range of the tower
+ * @param tower
+ * @param towerIndex the index (array key) of the tower
+ */
+function shootAtMonsterInRange(tower, towerIndex) {
+	
+	if (typeof(tower.lastShootingTime) == 'undefined' || ((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
+		// Let's check if it has to shoot
+		towers[towerIndex].lastShootingTime = Date.now();
+		// Check if the last monster is still in range, if there is a last target
+		if (tower.shootingTargetIndex != undefined && monsters[tower.shootingTargetIndex] != undefined && isInRange(tower, monsters[tower.shootingTargetIndex])) {
+			createBullet(tower, tower.shootingTargetIndex, towerIndex);
+		}
+		else if (monsterIndex = getMonsterInRange(tower)) {
+			createBullet(tower, monsterIndex, towerIndex);
+			towers[towerIndex].shootinggTargetIndex = monsterIndex;
+			towers[towerIndex].isShoooting = true;
+		}
+	}
+	return;
+	if (tower.isShooting == true && (tower.hasBullet == undefined || tower.hasBullet == false)) {
+		tower.hasBullet = true;
+		if (typeof(tower.lastShootingTime) == 'undefined') {
+			tower.lastShootingTime = Date.now();
+			towers[key] = tower;
+			createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex, key);
+		}
+		else if (((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
+			tower.lastShootingTime = Date.now();
+			towers[key] = tower;
+			createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex, key);
+		}
+	}
+	
+}
+
+/**
+ * Get a monster in range of the tower
+ * @param tower the object of the tower
+ * @return the index of the monster
+ * @todo randomize the monster or get the closest
+ */
+function getMonsterInRange(tower) {
+	// @todo Shuffle monsters
+	shortestDistance = 100000;
+	monsterClosestIndex = '';
+	monsters.forEach(function(monster, index) {
+		if (isInRange(tower, monster)) {
+			vector = new Object();
+			vector.x = monster.position.x - tower.position.x;
+			//vector.y = monster.position.y - tower.position.y;
+			vector.z = monster.position.z - tower.position.z;
+			// (c) Pythagoras
+			distance = Math.sqrt(vector.x * vector.x + vector.z * vector.z);
+			console.log(index +' = ' + distance +' < ' + shortestDistance);
+			if (distance < shortestDistance) {
+				monsterClosestIndex = index;
+				shortestDistance = distance;
+			}
+		}
+	});
+	if (monsterClosestIndex != '') {
+		return monsterClosestIndex;
+	}
+	return false; // No monsters in range
+}
+
+/**
+ * Check if the monster is in shooting range of the tower
+ * @param tower Tower Object
+ * @param monster Monster Object
+ * @returns {Boolean} whether the monster is in shooting range of the tower
+ */
+function isInRange(tower, monster) {
+	x = calculateX(tower.position.x);
+	y = calculateY(tower.position.z);
+	minX = x - tower.stats.range;
+	maxX = x + tower.stats.range;
+	minY = y - tower.stats.range;
+	maxY = y + tower.stats.range;
+	monsterX = calculateX(monster.position.x);
+	monsterY = calculateY(monster.position.z);
+	if (minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY) {
+		return true;
+	}
+	return false;
 }
 
 /**
  * Create a bullet at the tower spot and move it to the monster.
  */
-function createBullet(tower, target, targetIndex) {
+function createBullet(tower, targetIndex, towerIndex) {
+	towers[towerIndex].hasBullet = true;
 	someBullet = tower.projectile;
 	someBullet.position.set(tower.position.x, (tower.position.y + tower.size.y), tower.position.z);
-	scene.add(someBullet);
 	someBullet.end = new Object()
 	someBullet.end.x = monsters[targetIndex].position.x;
 	someBullet.end.y = monsters[targetIndex].position.y;
 	someBullet.end.z = monsters[targetIndex].position.z;
-	bulletSpeed = 8;
-	someBullet.lifeTime = 50;
+	bulletSpeed = 32;
+	someBullet.lifeTime = 120;
 	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
 	someBullet.speed = speed;
 	someBullet.stats = tower.stats;
 	someBullet.targetIndex = targetIndex;
+	someBullet.towerIndex = towerIndex;
 	bullets.push(someBullet);
+	scene.add(bullets[bullets.length-1]);
 }
 
 /**
@@ -703,7 +802,7 @@ function calculateBulletSpeed(startPosition, endPosition, speed) {
 	vector.z = endPosition.z - startPosition.z;
 	// (c) Pythagoras
 	distance = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-	c = (distance / speed) / 2;
+	c = distance / speed;
 	bulletSpeed.x = vector.x / c;
 	bulletSpeed.y = vector.y / c;
 	bulletSpeed.z = vector.z / c;
@@ -799,7 +898,6 @@ function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
-	console.log(camera.position);
 }
 
 /**
