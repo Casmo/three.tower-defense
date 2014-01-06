@@ -112,7 +112,7 @@ function init() {
 		45,
 		window.innerWidth / window.innerHeight,
 		0.1,
-		1000000
+		5000
 	);
 	camera.position.x = 128;
 	camera.position.y = boardSize.z;
@@ -279,47 +279,47 @@ function render() {
 		mars.rotation.y -= 0.0020;
 	}
 		
+	if (detailLevel == 'high') {
+		sunLightTimer += 0.00014; // @todo finetune
+		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
+		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
+		skyBox.rotation.y += 0.00015;
+		timer = Date.now() * 0.001;
+		floor.position.y = Math.sin(timer) * 16;
+		rockBottom.position.y = (Math.sin(timer) * 16) - (boardSize.y / 2);
+	}
+	for (i = 0; i < tiles.length; i++) {
 		if (detailLevel == 'high') {
-			sunLightTimer += 0.00014; // @todo finetune
-			sunLight.position.z = Math.cos(sunLightTimer) * 1024;
-			sunLight.position.x = Math.sin(sunLightTimer) * 1024;
-			skyBox.rotation.y += 0.00015;
-			timer = Date.now() * 0.001;
-			floor.position.y = Math.sin(timer) * 16;
-			rockBottom.position.y = (Math.sin(timer) * 16) - (boardSize.y / 2);
-		}
-		for (i = 0; i < tiles.length; i++) {
-			if (detailLevel == 'high') {
-				tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
-				if (towers[i] != undefined) {
-					towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
-				}
-			}
-			else {
-				if (towers[i] != undefined && tiles[i].selected != true) {
-					towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
-				}
-			}
-			if (tiles[i].selected != undefined && tiles[i].selected == true) {
-				tiles[i].rotation.y += 0.008;
-				activeTimer = Date.now() * 0.005;
-				tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 8);
-				if (towers[i] != undefined) {
-					// Active tower has to be on top of the selected tile as well (for updating)
-					towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
-					towers[i].rotation.y += 0.008;
-				}
-			}
-			else {
-				tiles[i].rotation.y = 0;
-				if (towers[i] != undefined) {
-					towers[i].rotation.y = 0;
-				}
-				if (detailLevel == 'medium' || detailLevel == 'low') {
-					tiles[i].position.y = (boardSize.y / 2);
-				}
+			tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
+			if (towers[i] != undefined) {
+				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
 			}
 		}
+		else {
+			if (towers[i] != undefined && tiles[i].selected != true) {
+				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+			}
+		}
+		if (tiles[i].selected != undefined && tiles[i].selected == true) {
+			tiles[i].rotation.y += 0.008;
+			activeTimer = Date.now() * 0.005;
+			tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 8);
+			if (towers[i] != undefined) {
+				// Active tower has to be on top of the selected tile as well (for updating)
+				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+				towers[i].rotation.y += 0.008;
+			}
+		}
+		else {
+			tiles[i].rotation.y = 0;
+			if (towers[i] != undefined) {
+				towers[i].rotation.y = 0;
+			}
+			if (detailLevel == 'medium' || detailLevel == 'low') {
+				tiles[i].position.y = (boardSize.y / 2);
+			}
+		}
+	}
 	// Move monsters
 	//for (i = 0; i < monsters.length; i++) {
 	monsters.forEach(function(monster, i, theArray) {
@@ -625,9 +625,11 @@ function shootAtMonsterInRange(tower, towerIndex) {
 function getMonsterInRange(tower) {
 	// @todo Shuffle monsters
 	shortestDistance = 100000;
+	closestToExit = 0;
 	monsterClosestIndex = '';
 	monsters.forEach(function(monster, index) {
 		if (isInRange(tower, monster)) {
+			/*
 			vector = new Object();
 			vector.x = monster.position.x - tower.position.x;
 			//vector.y = monster.position.y - tower.position.y;
@@ -638,6 +640,11 @@ function getMonsterInRange(tower) {
 			if (distance < shortestDistance) {
 				monsterClosestIndex = index;
 				shortestDistance = distance;
+			}
+			*/
+			if (monster.position.x > closestToExit) {
+				closestToExit = monster.position.x;
+				monsterClosestIndex = index;
 			}
 		}
 	});
