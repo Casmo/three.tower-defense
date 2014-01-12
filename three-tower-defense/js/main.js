@@ -76,7 +76,7 @@ function preLoader() {
 		manager = new THREE.LoadingManager();
 		texture = new THREE.Texture();
 		loader = new THREE.ImageLoader(manager);
-		loader.load'files/models/rock_bottom.jpg', function (image) {
+		loader.load('files/models/rock_bottom.jpg', function (image) {
 			texture.image = image;
 			texture.needsUpdate = true;
 		} );
