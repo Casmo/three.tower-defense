@@ -76,12 +76,12 @@ function preLoader() {
 		manager = new THREE.LoadingManager();
 		texture = new THREE.Texture();
 		loader = new THREE.ImageLoader(manager);
-		loader.load( 'files/models/rock_bottom.jpg', function ( image ) {
+		loader.load'files/models/rock_bottom.jpg', function (image) {
 			texture.image = image;
 			texture.needsUpdate = true;
 		} );
 		loader = new THREE.OBJLoader(manager);
-		loader.load('files/models/rock_bottom.obj', function ( object ) {
+		loader.load('files/models/rock_bottom.obj', function (object) {
 	
 			object.traverse( function ( child ) {
 				if ( child instanceof THREE.Mesh ) {

@@ -94,9 +94,9 @@ var Planet = function(t) {
 	var object;
 	this.texture = 'images/planet-moon.jpg';
 	this.size = new Object();
-	this.size.x = 32;
-	this.size.y = 32;
-	this.size.z = 32;
+	this.size.x = (tileSize / 2);
+	this.size.y = (tileSize / 2);
+	this.size.z = (tileSize / 2);
 	this.position = new Object();
 	this.position.x = 10;
 	this.position.y = 50;
@@ -142,7 +142,6 @@ var Tile = function(t) {
 	this.texture = 'images/grass-dark.jpg';
 	this.size = new Object();
 	this.size.x = 64;
-	this.size.y = 8;
 	this.size.z = 64;
 	this.position = new Object();
 	this.position.x = 0;
@@ -160,7 +159,6 @@ var Tile = function(t) {
 				map: texture
 			}
 		);
-		//geometry = new t.CubeGeometry(this.size.x, this.size.y, this.size.z);
 		geometry = new t.PlaneGeometry(this.size.x, this.size.z);
 		object = new t.Mesh(geometry, material);
 		object.position.set(this.position.x, this.position.y, this.position.z);
