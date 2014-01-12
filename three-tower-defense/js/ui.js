@@ -14,7 +14,7 @@ function showBuildmenu(tile) {
 	}
 	if (towers[tile.index] != undefined) {
 		// Delete option
-		buildmenu.innerHTML += '<img src="images/towers/destroy.png" class="building" onclick="destroyTower(' + tile.index + ');deselectTiles();hideBuildmenu();" />';
+		buildmenu.innerHTML += '<img src="images/towers/destroy.png" class="building" id="buildingDestroy" />';
 	}
 	if (devMode == true) {
 		buildmenu.innerHTML += tile.x;
@@ -22,6 +22,40 @@ function showBuildmenu(tile) {
 		buildmenu.innerHTML += tile.y;
 	}
 	buildmenu.style.display = 'block';
+	building0 = document.getElementById('building0');
+	building1 = document.getElementById('building1');
+	building2 = document.getElementById('building2');
+	buildingDestroy = document.getElementById('buildingDestroy');
+	building0.addEventListener('click', function() {
+		build(0);
+    });
+	building0.addEventListener('mouseover', function() {
+		showBuildingInfo(0);
+    });
+	building0.addEventListener('mouseout', function() {
+		hideBuildingInfo();
+    });
+	building1.addEventListener('click', function() {
+		build(1);
+    });
+	building1.addEventListener('mouseover', function() {
+		showBuildingInfo(1);
+    });
+	building1.addEventListener('mouseout', function() {
+		hideBuildingInfo();
+    });
+	building2.addEventListener('click', function() {
+		build(2);
+    });
+	building2.addEventListener('mouseover', function() {
+		showBuildingInfo(2);
+    });
+	building2.addEventListener('mouseout', function() {
+		hideBuildingInfo();
+    });
+	buildingDestroy.addEventListener('click', function() {
+		destroyTower(tile.index);deselectTiles();hideBuildmenu();
+    });
 }
 
 /**

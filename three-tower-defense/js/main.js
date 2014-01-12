@@ -3,7 +3,6 @@
  * A simple world in outer-space where two words of chaos and order collide.
  * @author Mathieu de Ruiter (www.fellicht.nl)
  */
-
 var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 100, currentWave = 0,
@@ -90,7 +89,7 @@ function preLoader() {
 				}
 			} );
 			rockBottom = object;
-			setTimeout("init();", 2000);
+			init();
 		} );
 	}
 }
@@ -133,7 +132,7 @@ function init() {
 	sunLight = new THREE.SpotLight(0xffffff);
 	sunLight.position.set(0 - boardSize.x, 512, 0);
 	scene.add(sunLight);
-	sunLight.intensity = 2;
+	sunLight.intensity = 1.25;
 	if (devMode == true) {
 		sunLight.shadowCameraVisible = true;
 	}
@@ -211,7 +210,7 @@ function init() {
 				tile.texture = 'images/grass-moss.jpg';
 			}
 			tile.position.y += boardSize.y * 2;
-			tile.position.y = 1 + (boardSize.y / 2);
+			tile.position.y = 3 + (boardSize.y / 2);
 			tile.create();
 			tiles[count] = tile.getObject();
 			tiles[count].x = x;
@@ -260,7 +259,10 @@ function init() {
 	projector = new THREE.Projector();
 	buildMenu = document.getElementById('buildmenu');
 	animate();
-	document.getElementById('spawn-timer').innerHTML = '<a href="#top" class="start-game" onclick="startGame();">Start game</a>';
+	document.getElementById('spawn-timer').innerHTML = '<a href="#top" class="start-game" id="startbutton">Start game</a>';
+	document.getElementById('startbutton').addEventListener('click', function() {
+		startGame();
+    });
 }
 
 function render() {
@@ -280,7 +282,7 @@ function render() {
 	}
 	for (i = 0; i < tiles.length; i++) {
 		if (detailLevel == 'high') {
-			tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
+			tiles[i].position.y = 3 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
 			if (towers[i] != undefined) {
 				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
 			}
@@ -306,7 +308,7 @@ function render() {
 				towers[i].rotation.y = 0;
 			}
 			if (detailLevel == 'medium' || detailLevel == 'low') {
-				tiles[i].position.y = 1 + (boardSize.y / 2);
+				tiles[i].position.y = 3 + (boardSize.y / 2);
 			}
 		}
 	}
@@ -318,7 +320,7 @@ function render() {
 		if (tmpMX > monsters[i].position.x) {
 			monsters[i].position.x += monsters[i].stats.speed;
 			healthBars[i].position.x += monsters[i].stats.speed;
-			if (detailLevel == 'high') {
+			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.x = 0;
 				monsters[i].rotation.y = 0;
 				monsters[i].rotation.z -= monsters[i].stats.speed / 25;
@@ -327,7 +329,7 @@ function render() {
 		else if (tmpMX < monsters[i].position.x) {
 			monsters[i].position.x -= monsters[i].stats.speed;
 			healthBars[i].position.x -= monsters[i].stats.speed;
-			if (detailLevel == 'high') {
+			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.x = 0;
 				monsters[i].rotation.y = 0;
 				monsters[i].rotation.z += monsters[i].stats.speed / 25;
@@ -336,7 +338,7 @@ function render() {
 		else if (tmpMY > monsters[i].position.z) {
 			monsters[i].position.z += monsters[i].stats.speed;
 			healthBars[i].position.z += monsters[i].stats.speed;
-			if (detailLevel == 'high') {
+			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.z = 0;
 				monsters[i].rotation.y = 0;
 				monsters[i].rotation.x += monsters[i].stats.speed / 25;
@@ -345,7 +347,7 @@ function render() {
 		else if (tmpMY < monsters[i].position.z) {
 			monsters[i].position.z -= monsters[i].stats.speed;
 			healthBars[i].position.z -= monsters[i].stats.speed;
-			if (detailLevel == 'high') {
+			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.z = 0;
 				monsters[i].rotation.y = 0;
 				monsters[i].rotation.x -= monsters[i].stats.speed / 25;
@@ -906,11 +908,6 @@ function updateCurrency() {
 }
 
 function showBuildingInfo(building) {
-	buildings[0].costs = 10;
-	buildings[0].stats = new Object();
-	buildings[0].stats.speed = 12;
-	buildings[0].stats.damage = 5;
-	buildings[0].stats.range = 2;
 	infoHtml = 'Cost: <b>' + buildings[building].costs +'</b><br />';
 	infoHtml += 'Damage: <b>' + buildings[building].stats.damage +'</b><br />';
 	infoHtml += 'Speed: <b>' + buildings[building].stats.speed +'</b><br />';

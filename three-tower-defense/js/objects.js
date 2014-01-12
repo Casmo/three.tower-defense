@@ -13,7 +13,7 @@ buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x00ff99});
 var buildings = new Array();
 // triangle
 buildings[0] = new Object();
-buildings[0].html = '<img src="images/towers/001.png" class="building" onclick="return build(0);" onmouseover="showBuildingInfo(0);" onmouseout="hideBuildingInfo();" />';
+buildings[0].html = '<img src="images/towers/001.png" class="building" id="building0" />';
 buildings[0].mesh = function() {
 	return new THREE.Mesh(
 		new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
@@ -37,7 +37,7 @@ buildings[0].projectile = function() {
 }
 // circle
 buildings[1] = new Object();
-buildings[1].html = '<img src="images/towers/002.png" class="building" onclick="return build(1);" onmouseover="showBuildingInfo(1);" onmouseout="hideBuildingInfo();" />';
+buildings[1].html = '<img src="images/towers/002.png" class="building" id="building1" />';
 buildings[1].mesh = function() {
 	return new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/2), 16, 16),
@@ -61,7 +61,7 @@ buildings[1].projectile = function() {
 }
 // square
 buildings[2] = new Object();
-buildings[2].html = '<img src="images/towers/003.png" class="building" onclick="return build(2);" onmouseover="showBuildingInfo(2);" onmouseout="hideBuildingInfo();" />';
+buildings[2].html = '<img src="images/towers/003.png" class="building" id="building2" />';
 buildings[2].mesh = function() {
 	return new THREE.Mesh(
 		new THREE.CubeGeometry(tileSize-16, tileSize, tileSize-16),
