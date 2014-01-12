@@ -112,7 +112,7 @@ function init() {
 		45,
 		window.innerWidth / window.innerHeight,
 		0.1,
-		5000
+		10000
 	);
 	camera.position.x = 128;
 	camera.position.y = boardSize.z;
@@ -203,23 +203,14 @@ function init() {
 			tile.size.z = tileSize - 4;
 			
 			// Add hight for the tile
-			if (detailLevel == 'high') {
-				randomHeight = Math.random()*16 + 4;
-			}
-			else {
-				randomHeight = 4;
-			}
 			// The first row is to spawn monsters
 			if (x == 0) {
-				randomHeight = 22;
 				tile.texture = 'images/grass-moss.jpg';
 			}
 			if (x == (boardSize.x / tileSize) - 1) {
-				randomHeight = 2;
 				tile.texture = 'images/grass-moss.jpg';
 			}
-			tile.size.y = randomHeight;
-			tile.position.y += (boardSize.y + randomHeight) * 2;
+			tile.position.y += boardSize.y * 2;
 			tile.position.y = 1 + (boardSize.y / 2);
 			tile.create();
 			tiles[count] = tile.getObject();
@@ -237,7 +228,6 @@ function init() {
 				indexCount = count;
 				tiles[count].callback = function() { return showBuildmenu(this); }
 			}
-			tiles[count].height = randomHeight;
 
 			if (detailLevel == 'high') {
 				tiles[count].castShadow = true;
@@ -292,31 +282,31 @@ function render() {
 		if (detailLevel == 'high') {
 			tiles[i].position.y = 1 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
 			if (towers[i] != undefined) {
-				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
 			}
 		}
 		else {
 			if (towers[i] != undefined && tiles[i].selected != true) {
-				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
 			}
 		}
 		if (tiles[i].selected != undefined && tiles[i].selected == true) {
-			tiles[i].rotation.y += 0.008;
+			tiles[i].rotation.z += 0.008;
 			activeTimer = Date.now() * 0.005;
 			tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 8);
 			if (towers[i] != undefined) {
 				// Active tower has to be on top of the selected tile as well (for updating)
-				towers[i].position.y = tiles[i].position.y + (tileSize / 2) + (tiles[i].height / 2);
+				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
 				towers[i].rotation.y += 0.008;
 			}
 		}
 		else {
-			tiles[i].rotation.y = 0;
+			tiles[i].rotation.z = 0;
 			if (towers[i] != undefined) {
 				towers[i].rotation.y = 0;
 			}
 			if (detailLevel == 'medium' || detailLevel == 'low') {
-				tiles[i].position.y = (boardSize.y / 2);
+				tiles[i].position.y = 1 + (boardSize.y / 2);
 			}
 		}
 	}
