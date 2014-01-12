@@ -27,7 +27,7 @@ buildings[0].size.z = tileSize;
 buildings[0].costs = 12;
 buildings[0].stats = new Object();
 buildings[0].stats.speed = 10;
-buildings[0].stats.damage = 9;
+buildings[0].stats.damage = 10;
 buildings[0].stats.range = 3;
 buildings[0].projectile = function() {
 	return new THREE.Mesh(
@@ -75,8 +75,8 @@ buildings[2].size.y = tileSize;
 buildings[2].size.z = tileSize;
 buildings[2].costs = 3;
 buildings[2].stats = new Object();
-buildings[2].stats.speed = 20;
-buildings[2].stats.damage = 2.75;
+buildings[2].stats.speed = 25;
+buildings[2].stats.damage = 4;
 buildings[2].stats.range = 3;
 buildings[2].projectile = function() {
 	return new THREE.Mesh(

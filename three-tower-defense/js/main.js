@@ -8,7 +8,7 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 100, currentWave = 0,
 	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0,
-	coins = new Array(), gameStarted = false;
+	coins = new Array(), gameStarted = false, healthBars = new Array(), maxWaves = 30;
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -317,6 +317,7 @@ function render() {
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
 		if (tmpMX > monsters[i].position.x) {
 			monsters[i].position.x += monsters[i].stats.speed;
+			healthBars[i].position.x += monsters[i].stats.speed;
 			if (detailLevel == 'high') {
 				monsters[i].rotation.x = 0;
 				monsters[i].rotation.y = 0;
@@ -325,6 +326,7 @@ function render() {
 		}
 		else if (tmpMX < monsters[i].position.x) {
 			monsters[i].position.x -= monsters[i].stats.speed;
+			healthBars[i].position.x -= monsters[i].stats.speed;
 			if (detailLevel == 'high') {
 				monsters[i].rotation.x = 0;
 				monsters[i].rotation.y = 0;
@@ -333,6 +335,7 @@ function render() {
 		}
 		else if (tmpMY > monsters[i].position.z) {
 			monsters[i].position.z += monsters[i].stats.speed;
+			healthBars[i].position.z += monsters[i].stats.speed;
 			if (detailLevel == 'high') {
 				monsters[i].rotation.z = 0;
 				monsters[i].rotation.y = 0;
@@ -341,6 +344,7 @@ function render() {
 		}
 		else if (tmpMY < monsters[i].position.z) {
 			monsters[i].position.z -= monsters[i].stats.speed;
+			healthBars[i].position.z -= monsters[i].stats.speed;
 			if (detailLevel == 'high') {
 				monsters[i].rotation.z = 0;
 				monsters[i].rotation.y = 0;
@@ -355,7 +359,9 @@ function render() {
 		}
 		if (detailLevel == 'high') {
 			activeTimer = Date.now() * 0.005;
-			monsters[i].position.y = tilesSizes[monsters[i].nextStep.x][monsters[i].nextStep.y].size.y + 32 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
+			yPos = tilesSizes[monsters[i].nextStep.x][monsters[i].nextStep.y].size.y + 32 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
+			monsters[i].position.y = yPos;
+			healthBars[i].position.y = yPos + 37;
 		}
 		if (monsters[i].currentStep.x == monsters[i].end.x && monsters[i].currentStep.y == monsters[i].end.y) {
 			deleteMonster(i, true);
@@ -380,6 +386,9 @@ function render() {
 			if (distance <= 32 || distance >= (boardSize.x + boardSize.y)) {
 				if (monsters[bullets[i].targetIndex] != undefined) {
 					monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
+					percent = 100 / (monsters[bullets[i].targetIndex].stats.hp_100 / monsters[bullets[i].targetIndex].stats.hp);
+					healthBars[bullets[i].targetIndex].scale.x = 1 / 100 * percent;
+					healthBars[bullets[i].targetIndex].position.y
 				}
 				if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
 					deleteMonster(bullets[i].targetIndex, false);
@@ -484,12 +493,38 @@ function spawnMonster(tile, extraStats) {
 	if (extraStats.hp != undefined) {
 		monsterObject.stats.hp = extraStats.hp;
 	}
+	if (extraStats.hp_100 != undefined) {
+		monsterObject.stats.hp_100 = extraStats.hp_100;
+	}
 	if (extraStats.speed != undefined) {
 		monsterObject.stats.speed = extraStats.speed;
 	}
 	if (extraStats.currency != undefined) {
 		monsterObject.stats.currency = extraStats.currency;
 	}
+	
+	var materialHealthBar = new THREE.LineBasicMaterial({
+		color: 0xff0000
+    });
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+    geometry.vertices.push(new THREE.Vector3((tile.size.x * 0.9), 0, 0));
+    geometry.verticesNeedUpdate = true;
+    geometry.elementsNeedUpdate = true;
+    geometry.morphTargetsNeedUpdate = true;
+    geometry.uvsNeedUpdate = true;
+    geometry.normalsNeedUpdate = true;
+    geometry.colorsNeedUpdate = true;
+    geometry.tangentsNeedUpdate = true;
+    geometry.dynamic = true;
+    var line = new THREE.Line(geometry, materialHealthBar);
+    line.position = monster.position;
+    line.position.y = monster.position.y + monster.size.y + 5;
+    line.position.x -= ((tile.size.x * 0.9) / 2);
+    
+    healthBars.push(line);
+    scene.add(healthBars[healthBars.length-1]);
+	
 	monsters.push(monsterObject);
 	scene.add(monsters[monsters.length-1]);
 }
@@ -527,8 +562,10 @@ function deleteMonster(index, removeLife) {
 			tower.shootingTarget = '';
 		}
 	});
+	scene.remove(healthBars[index]);
 	scene.remove(monsters[index]);
-	delete monsters[index]; // monsters.splice(index, 1);
+	delete monsters[index];
+	delete healthBars[index];
 }
 
 /**

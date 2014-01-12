@@ -1,7 +1,7 @@
 function spawnWave() {
 	waveTimer = (new Date().getTime() / 1000);
 	currentWave++;
-	if (currentWave > 25) {
+	if (currentWave > maxWaves) {
 		if (score.lives > 0) {
 			document.getElementById('spawn-timer').innerHTML = 'You survived!';
 		}
@@ -14,14 +14,15 @@ function spawnWave() {
 	maxY = Math.floor(boardSize.z / tileSize) - 1;
 	timeOut = 0;
 	maxMonsters = Math.round(currentWave * 3.2);
-	if (maxMonsters > 80) {
-		maxMonsters = 80;
+	if (maxMonsters > Math.round(maxWaves * 3.2)) {
+		maxMonsters = Math.round(maxWaves * 3.2);
 	}
 	someStats = new Object();
 	someStats.hp = Math.round((currentWave+1) * 12);
-	if (someStats.hp > 300) {
-		someStats.hp = 300;
+	if (someStats.hp > Math.round(maxWaves * 12)) {
+		someStats.hp = Math.round(maxWaves * 12);
 	}
+	someStats.hp_100 = someStats.hp;
 	someStats.speed = 1;
 	if (someStats.speed > 10) {
 		someStats.speed = 10;
