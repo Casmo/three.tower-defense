@@ -160,7 +160,6 @@ var Tile = function(t) {
 				map: texture
 			}
 		);
-		//geometry = new t.CubeGeometry(this.size.x, this.size.y, this.size.z);
 		geometry = new t.PlaneGeometry(this.size.x, this.size.z);
 		object = new t.Mesh(geometry, material);
 		object.position.set(this.position.x, this.position.y, this.position.z);

@@ -747,7 +747,6 @@ function createExplosion(position) {
 function createCoin(position) {
 	coinMaterial = new THREE.MeshBasicMaterial({color: 0xfffc00});
 	coin = new THREE.Mesh( 
-			// radiusAtTop, radiusAtBottom, height, segmentsAroundRadius, segmentsAlongHeight,
 			new THREE.CylinderGeometry(16, 16, 4, 20, 4), 
 			coinMaterial);
 	coin.position.set(position.x, position.y, position.z);
