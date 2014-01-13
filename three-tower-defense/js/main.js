@@ -603,9 +603,10 @@ function getMonsterInRange(tower) {
 	closestToExit = -1000;
 	monsterClosestIndex = '';
 	monsters.forEach(function(monster, index) {
+		currentX = monster.position.x + 1000;
 		if (isInRange(tower, monster)) {
-			if (monster.position.x > closestToExit) {
-				closestToExit = monster.position.x;
+			if (currentX > closestToExit) {
+				closestToExit = currentX;
 				monsterClosestIndex = index;
 			}
 		}
