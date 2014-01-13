@@ -357,7 +357,6 @@ function render() {
 		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
 			// Calculate nextStep
 			monsters[i].setNodes();
-			activateTowers(i); // @TODO fix towers on tower level not monster level
 		}
 		if (detailLevel == 'high') {
 			activeTimer = Date.now() * 0.005;
@@ -571,50 +570,11 @@ function deleteMonster(index, removeLife) {
 }
 
 /**
- * Activate towers to shoot at this monster
- * @param Object monster
- * @deprecated don't use. Use shootAtMonsterInRange instead.
- */
-function activateTowers(monsterIndex) {
-	monster = monsters[monsterIndex];
-	towers.forEach(function(tower, index) {
-		x = calculateX(tower.position.x);
-		y = calculateY(tower.position.z);
-		minX = x - tower.stats.range;
-		maxX = x + tower.stats.range;
-		minY = y - tower.stats.range;
-		maxY = y + tower.stats.range;
-		monsterX = calculateX(monster.position.x);
-		monsterY = calculateY(monster.position.z);
-		if (tower.isShooting == false && minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY) {
-			tower.isShooting = true;
-			tower.hasBullet = false;
-			tower.shootingTarget = monster;
-			tower.shootingTargetIndex = monsterIndex;
-		}
-		else if (tower.isShooting == true && tower.shootingTargetIndex == monsterIndex && !(minX <= monsterX && maxX >= monsterX && minY <= monsterY && maxY >= monsterY)) {
-			tower.isShooting = false;
-			tower.hasBullet = false;
-			tower.shootingTarget = '';
-			tower.shootingTargetIndex = '';
-		}
-		else if(tower.lastShootingTime != undefined && (Date.now() - tower.lastShootingTime) > 3000) {
-			tower.isShooting = false;
-			tower.hasBullet = false;
-			tower.shootingTarget = '';
-			tower.shootingTargetIndex = '';
-		}
-		towers[index] = tower;
-	});
-}
-
-/**
  * Shoot at a monster in the range of the tower
  * @param tower
  * @param towerIndex the index (array key) of the tower
  */
 function shootAtMonsterInRange(tower, towerIndex) {
-	
 	if (typeof(tower.lastShootingTime) == 'undefined' || ((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
 		// Let's check if it has to shoot
 		towers[towerIndex].lastShootingTime = Date.now();
@@ -622,27 +582,15 @@ function shootAtMonsterInRange(tower, towerIndex) {
 		if (tower.shootingTargetIndex != undefined && monsters[tower.shootingTargetIndex] != undefined && isInRange(tower, monsters[tower.shootingTargetIndex])) {
 			createBullet(tower, tower.shootingTargetIndex, towerIndex);
 		}
-		else if (monsterIndex = getMonsterInRange(tower)) {
-			createBullet(tower, monsterIndex, towerIndex);
-			towers[towerIndex].shootinggTargetIndex = monsterIndex;
-			towers[towerIndex].isShoooting = true;
+		else {
+			monsterIndex = getMonsterInRange(tower);
+			if (typeof monsterIndex == 'number') {
+				createBullet(tower, monsterIndex, towerIndex);
+				towers[towerIndex].shootinggTargetIndex = monsterIndex;
+				towers[towerIndex].isShoooting = true;
+			}
 		}
 	}
-	return;
-	if (tower.isShooting == true && (tower.hasBullet == undefined || tower.hasBullet == false)) {
-		tower.hasBullet = true;
-		if (typeof(tower.lastShootingTime) == 'undefined') {
-			tower.lastShootingTime = Date.now();
-			towers[key] = tower;
-			createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex, key);
-		}
-		else if (((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
-			tower.lastShootingTime = Date.now();
-			towers[key] = tower;
-			createBullet(tower, tower.shootingTarget, tower.shootingTargetIndex, key);
-		}
-	}
-	
 }
 
 /**
@@ -652,35 +600,20 @@ function shootAtMonsterInRange(tower, towerIndex) {
  * @todo randomize the monster or get the closest
  */
 function getMonsterInRange(tower) {
-	// @todo Shuffle monsters
-	shortestDistance = 100000;
-	closestToExit = 0;
+	closestToExit = -1000;
 	monsterClosestIndex = '';
 	monsters.forEach(function(monster, index) {
 		if (isInRange(tower, monster)) {
-			/*
-			vector = new Object();
-			vector.x = monster.position.x - tower.position.x;
-			//vector.y = monster.position.y - tower.position.y;
-			vector.z = monster.position.z - tower.position.z;
-			// (c) Pythagoras
-			distance = Math.sqrt(vector.x * vector.x + vector.z * vector.z);
-			console.log(index +' = ' + distance +' < ' + shortestDistance);
-			if (distance < shortestDistance) {
-				monsterClosestIndex = index;
-				shortestDistance = distance;
-			}
-			*/
 			if (monster.position.x > closestToExit) {
 				closestToExit = monster.position.x;
 				monsterClosestIndex = index;
 			}
 		}
 	});
-	if (monsterClosestIndex != '') {
+	if (typeof monsterClosestIndex == 'number') {
 		return monsterClosestIndex;
 	}
-	return false; // No monsters in range
+	return false;
 }
 
 /**
@@ -754,6 +687,7 @@ function build(buildingIndex) {
 			building.shootingTarget = '';
 			building.projectile = buildings[buildingIndex].projectile();
 			building.size = buildings[buildingIndex].size;
+			building.lastShootingTime = Date.now();
 			if (detailLevel == 'high') {
 				building.castShadow = true;
 			}

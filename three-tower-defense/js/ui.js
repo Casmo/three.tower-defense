@@ -53,9 +53,11 @@ function showBuildmenu(tile) {
 	building2.addEventListener('mouseout', function() {
 		hideBuildingInfo();
     });
-	buildingDestroy.addEventListener('click', function() {
-		destroyTower(tile.index);deselectTiles();hideBuildmenu();
-    });
+    if (buildingDestroy != undefined) {
+		buildingDestroy.addEventListener('click', function() {
+			destroyTower(tile.index);deselectTiles();hideBuildmenu();
+	    });
+    }
 }
 
 /**
