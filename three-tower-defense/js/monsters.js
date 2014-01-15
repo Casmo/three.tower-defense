@@ -8,15 +8,15 @@ var Monster = function(t) {
 	this.stats = new Object();
 	this.stats.hp = 15;
 	this.stats.hp_100 = 15;
-	this.stats.speed = 1;
+	this.stats.speed = 0.125;
 	this.stats.currency = 1;
 	this.size = new Object();
-	this.size.x = 32;
-	this.size.y = 32;
-	this.size.z = 32;
+	this.size.x = tileSize / 2;
+	this.size.y = tileSize * 2;
+	this.size.z = tileSize * 2;
 	this.position = new Object();
 	this.position.x = 10;
-	this.position.y = 50;
+	this.position.y = 6.25;
 	this.position.z = 0;
 	
 	// Store the end tile for this monster

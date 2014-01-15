@@ -4,15 +4,15 @@
  * 2.
  */
 var boardSize = new Object();
-boardSize.x = 832; // Width, must be multiple of 2
-boardSize.y = 64; // Height
-boardSize.z = 576; // Depth, must be multiple of 2
+boardSize.x = 104; // Width, must be multiple of 2
+boardSize.y = 8; // Height
+boardSize.z = 72; // Depth, must be multiple of 2
 
 /**
  * @param int tileSize
  * The x and y size of a tile. Must be a multiple of 2. Also used for buildings.
  */
-var tileSize = 64;
+var tileSize = 8;
 
 /**
  * @param string detailLevel

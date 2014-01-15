@@ -23,7 +23,7 @@ function spawnWave() {
 		someStats.hp = Math.round(maxWaves * 12);
 	}
 	someStats.hp_100 = someStats.hp;
-	someStats.speed = 1;
+	someStats.speed = 0.125;
 	if (someStats.speed > 10) {
 		someStats.speed = 10;
 	}

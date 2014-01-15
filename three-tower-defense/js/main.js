@@ -5,7 +5,7 @@
  */
 var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
-	explosions = new Array(), particleCount = 100, currentWave = 0,
+	explosions = new Array(), particleCount = 25, currentWave = 0,
 	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0,
 	coins = new Array(), gameStarted = false, healthBars = new Array(), maxWaves = 30;
 /**
@@ -18,7 +18,7 @@ var skyBox = '';
  * Score of the player
  */
 var score = new Object();
-score.currency = 25;
+score.currency = 250;
 score.lives = 20;
 
 /**
@@ -113,9 +113,9 @@ function init() {
 		0.1,
 		10000
 	);
-	camera.position.x = 128;
+	camera.position.x = 90;
 	camera.position.y = boardSize.z;
-	camera.position.z = boardSize.z * 2;
+	camera.position.z = boardSize.z * 1.5;
 	camera.lookAt(scene.position);
 	scene.add(camera);
 	document.body.appendChild(renderer.domElement);
@@ -142,6 +142,9 @@ function init() {
 	}
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
+	rockBottom.scale.x = 0.125;
+	rockBottom.scale.y = 0.125;
+	rockBottom.scale.z = 0.125;
 	if (detailLevel != 'low') {
 		rockBottom.position.set(0,0-(boardSize.y/2),0);
 		scene.add(rockBottom);
@@ -198,8 +201,8 @@ function init() {
 			tile.position.z = calculateYPosition(y);
 
 			// Make the tile a little smaller to fit nicely on the map
-			tile.size.x = tileSize - 4;
-			tile.size.z = tileSize - 4;
+			tile.size.x = tileSize - 0.25;
+			tile.size.z = tileSize - 0.25;
 			
 			// Add hight for the tile
 			// The first row is to spawn monsters
@@ -210,7 +213,7 @@ function init() {
 				tile.texture = 'images/grass-moss.jpg';
 			}
 			tile.position.y += boardSize.y * 2;
-			tile.position.y = 3 + (boardSize.y / 2);
+			tile.position.y = 0.1 + (boardSize.y / 2);
 			tile.create();
 			tiles[count] = tile.getObject();
 			tiles[count].x = x;
@@ -276,13 +279,14 @@ function render() {
 		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
 		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
 		skyBox.rotation.y += 0.00015;
-		timer = Date.now() * 0.001;
-		floor.position.y = Math.sin(timer) * 16;
-		rockBottom.position.y = (Math.sin(timer) * 16) - (boardSize.y / 2);
+		timer = Date.now() * 0.0005;
+		basePosY = Math.sin(timer) * 4;
+		floor.position.y = basePosY;
+		rockBottom.position.y = (basePosY) - (boardSize.y / 2);
 	}
 	for (i = 0; i < tiles.length; i++) {
 		if (detailLevel == 'high') {
-			tiles[i].position.y = 3 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
+			tiles[i].position.y = 0.1 + ((boardSize.y / 2) + (basePosY));
 			if (towers[i] != undefined) {
 				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
 			}
@@ -294,8 +298,8 @@ function render() {
 		}
 		if (tiles[i].selected != undefined && tiles[i].selected == true) {
 			tiles[i].rotation.z += 0.008;
-			activeTimer = Date.now() * 0.005;
-			tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 8);
+			activeTimer = Date.now() * 0.00525;
+			tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 2);
 			if (towers[i] != undefined) {
 				// Active tower has to be on top of the selected tile as well (for updating)
 				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
@@ -308,22 +312,28 @@ function render() {
 				towers[i].rotation.y = 0;
 			}
 			if (detailLevel == 'medium' || detailLevel == 'low') {
-				tiles[i].position.y = 3 + (boardSize.y / 2);
+				tiles[i].position.y = 0.1 + (boardSize.y / 2);
 			}
 		}
 	}
 	// Move monsters
-	//for (i = 0; i < monsters.length; i++) {
 	monsters.forEach(function(monster, i, theArray) {
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
+		if (detailLevel == 'high') {
+			monsters[i].position.y = (tileSize / 2) + 0.1 + ((boardSize.y / 2) + (basePosY));
+		}
+		else {
+			monsters[i].position.y = 0.1 + (boardSize.y / 2);
+		}
+		healthBars[i].position.y = monsters[i].position.y + 5;
 		if (tmpMX > monsters[i].position.x) {
 			monsters[i].position.x += monsters[i].stats.speed;
 			healthBars[i].position.x += monsters[i].stats.speed;
 			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.x = 0;
 				monsters[i].rotation.y = 0;
-				monsters[i].rotation.z -= monsters[i].stats.speed / 25;
+				monsters[i].rotation.z -= monsters[i].stats.speed / 5;
 			}
 		}
 		else if (tmpMX < monsters[i].position.x) {
@@ -332,7 +342,7 @@ function render() {
 			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.x = 0;
 				monsters[i].rotation.y = 0;
-				monsters[i].rotation.z += monsters[i].stats.speed / 25;
+				monsters[i].rotation.z += monsters[i].stats.speed / 5;
 			}
 		}
 		else if (tmpMY > monsters[i].position.z) {
@@ -341,7 +351,7 @@ function render() {
 			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.z = 0;
 				monsters[i].rotation.y = 0;
-				monsters[i].rotation.x += monsters[i].stats.speed / 25;
+				monsters[i].rotation.x += monsters[i].stats.speed / 5;
 			}
 		}
 		else if (tmpMY < monsters[i].position.z) {
@@ -350,19 +360,13 @@ function render() {
 			if (detailLevel == 'high' || detailLevel == 'medium') {
 				monsters[i].rotation.z = 0;
 				monsters[i].rotation.y = 0;
-				monsters[i].rotation.x -= monsters[i].stats.speed / 25;
+				monsters[i].rotation.x -= monsters[i].stats.speed / 5;
 			}
 		}
 		// @todo fix correct position check
 		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
 			// Calculate nextStep
 			monsters[i].setNodes();
-		}
-		if (detailLevel == 'high') {
-			activeTimer = Date.now() * 0.005;
-			yPos = tilesSizes[monsters[i].nextStep.x][monsters[i].nextStep.y].size.y + 32 + ((boardSize.y / 2) + (Math.sin(timer) * 16));
-			monsters[i].position.y = yPos;
-			healthBars[i].position.y = yPos + 37;
 		}
 		if (monsters[i].currentStep.x == monsters[i].end.x && monsters[i].currentStep.y == monsters[i].end.y) {
 			deleteMonster(i, true);
@@ -380,16 +384,14 @@ function render() {
 		if (monsters[bullets[i].targetIndex] != undefined) {
 			vector = new Object();
 			vector.x = monsters[bullets[i].targetIndex].position.x - bullets[i].position.x;
-			vector.y = monsters[bullets[i].targetIndex].position.y - bullets[i].position.y;
 			vector.z = monsters[bullets[i].targetIndex].position.z - bullets[i].position.z;
 			
-			distance = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-			if (distance <= 32 || distance >= (boardSize.x + boardSize.y)) {
+			distance = Math.sqrt(vector.x * vector.x + vector.z * vector.z);
+			if (distance <= 4 || distance >= (boardSize.x + boardSize.y)) {
 				if (monsters[bullets[i].targetIndex] != undefined) {
 					monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
 					percent = 100 / (monsters[bullets[i].targetIndex].stats.hp_100 / monsters[bullets[i].targetIndex].stats.hp);
 					healthBars[bullets[i].targetIndex].scale.x = 1 / 100 * percent;
-					healthBars[bullets[i].targetIndex].position.y
 				}
 				if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
 					deleteMonster(bullets[i].targetIndex, false);
@@ -415,7 +417,7 @@ function render() {
 			particle.speed.y = oldParticle.speed.y * 0.97;
 			particle.speed.z = oldParticle.speed.z * 0.97;
 			explosions[i].geometry.vertices[p] = particle;
-			if(particle.speed.x < 0.01 && particle.speed.x > -0.01 && particle.speed.y < 0.01 && particle.speed.y > -0.01 && particle.speed.z < 0.01 && particle.speed.z > -0.01) {
+			if(particle.speed.x < 0.001 && particle.speed.x > -0.001 && particle.speed.y < 0.001 && particle.speed.y > -0.001 && particle.speed.z < 0.001 && particle.speed.z > -0.001) {
 				removeParticleSystem = true;
 			}
 		}
@@ -430,7 +432,7 @@ function render() {
 	}
 	coins.forEach(function(coin, index) {
 		positionY = coins[index].lifeTime - 10;
-		positionY = Math.round(positionY*100)/100;
+		positionY = Math.round(positionY*12)/100;
 		coins[index].position.y += positionY;
 		coins[index].rotation.y += 0.1;
 		coins[index].lifeTime--;
@@ -649,7 +651,7 @@ function createBullet(tower, targetIndex, towerIndex) {
 	someBullet.end.x = monsters[targetIndex].position.x;
 	someBullet.end.y = monsters[targetIndex].position.y;
 	someBullet.end.z = monsters[targetIndex].position.z;
-	bulletSpeed = 32;
+	bulletSpeed = 1.75;
 	someBullet.lifeTime = 120;
 	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
 	someBullet.speed = speed;
@@ -718,16 +720,16 @@ function createExplosion(position) {
 	particles = new THREE.Geometry();
 	pMaterial = new THREE.ParticleBasicMaterial({
 		color: 0xFFFFFF,
-		size: 10
+		size: 1.25
     });
 	for (var p = 0; p < particleCount; p++) {
-		  pX = position.x + (Math.random() * 20 - 10);
-	      pY = position.y + (Math.random() * 20 - 10);
-	      pZ = position.z + (Math.random() * 20 - 10);
+		  pX = position.x;
+	      pY = position.y;
+	      pZ = position.z;
 	      speed = new Object();
-	      speed.x = Math.random() * 4 - 2;
-	      speed.y = Math.random() * 4 - 2;
-	      speed.z = Math.random() * 4 - 2;
+	      speed.x = Math.random() * 0.5;
+	      speed.y = Math.random() * 0.5;
+	      speed.z = Math.random() * 0.5;
 	      particle = new THREE.Vector3(pX, pY, pZ);
 	      particle.speed = speed;
 	      particles.vertices.push(particle);
@@ -748,7 +750,7 @@ function createExplosion(position) {
 function createCoin(position) {
 	coinMaterial = new THREE.MeshBasicMaterial({color: 0xfffc00});
 	coin = new THREE.Mesh( 
-			new THREE.CylinderGeometry(16, 16, 4, 20, 4), 
+			new THREE.CylinderGeometry(2, 2, 1, 12, 2), 
 			coinMaterial);
 	coin.position.set(position.x, position.y, position.z);
 	coin.rotation.z = 67.5;
