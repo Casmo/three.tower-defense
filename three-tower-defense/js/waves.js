@@ -18,9 +18,9 @@ function spawnWave() {
 		maxMonsters = Math.round(maxWaves * 1.2);
 	}
 	someStats = new Object();
-	someStats.hp = Math.round((currentWave+1) * 24);
-	if (someStats.hp > Math.round(maxWaves * 24)) {
-		someStats.hp = Math.round(maxWaves * 24);
+	someStats.hp = Math.round((currentWave+1) * 21);
+	if (someStats.hp > Math.round(maxWaves * 21)) {
+		someStats.hp = Math.round(maxWaves * 21);
 	}
 	someStats.hp_100 = someStats.hp;
 	someStats.speed = 0.125;
