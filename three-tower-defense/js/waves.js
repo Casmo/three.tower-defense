@@ -13,14 +13,14 @@ function spawnWave() {
 	x = 0;
 	maxY = Math.floor(boardSize.z / tileSize) - 1;
 	timeOut = 0;
-	maxMonsters = Math.round(currentWave * 3.2);
-	if (maxMonsters > Math.round(maxWaves * 3.2)) {
-		maxMonsters = Math.round(maxWaves * 3.2);
+	maxMonsters = Math.round(currentWave * 1.2);
+	if (maxMonsters > Math.round(maxWaves * 1.2)) {
+		maxMonsters = Math.round(maxWaves * 1.2);
 	}
 	someStats = new Object();
-	someStats.hp = Math.round((currentWave+1) * 12);
-	if (someStats.hp > Math.round(maxWaves * 12)) {
-		someStats.hp = Math.round(maxWaves * 12);
+	someStats.hp = Math.round((currentWave+1) * 24);
+	if (someStats.hp > Math.round(maxWaves * 24)) {
+		someStats.hp = Math.round(maxWaves * 24);
 	}
 	someStats.hp_100 = someStats.hp;
 	someStats.speed = 0.125;

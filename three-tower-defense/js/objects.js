@@ -5,7 +5,7 @@
 var buildingMaterial = new Array();
 buildingMaterial[0] = new THREE.MeshBasicMaterial({color: 0xff9900});
 buildingMaterial[1] = new THREE.MeshBasicMaterial({color: 0x99ff00});
-buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x00ff99});
+buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x9f9f9f});
 /**
  * @param array buildings
  * Available buildings to build
@@ -16,14 +16,19 @@ buildings[0] = new Object();
 buildings[0].html = '<img src="images/towers/001.png" class="building" id="building0" />';
 buildings[0].mesh = function() {
 	return new THREE.Mesh(
-		new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
+	new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
 		buildingMaterial[0]
 	);
 }
+// new THREE.Mesh(
+//new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
+//buildingMaterial[0]
+//);
 buildings[0].size = new Object();
 buildings[0].size.x = (tileSize-0.25);
 buildings[0].size.y = (tileSize-0.25);
 buildings[0].size.z = (tileSize-0.25);
+buildings[0].heightPos = (tileSize / 2);
 buildings[0].costs = 12;
 buildings[0].stats = new Object();
 buildings[0].stats.speed = 10;
@@ -48,6 +53,7 @@ buildings[1].size = new Object();
 buildings[1].size.x = (tileSize-0.25);
 buildings[1].size.y = (tileSize-0.25);
 buildings[1].size.z = (tileSize-0.25);
+buildings[1].heightPos = (tileSize / 2);
 buildings[1].costs = 30;
 buildings[1].stats = new Object();
 buildings[1].stats.speed = 20;
@@ -63,6 +69,9 @@ buildings[1].projectile = function() {
 buildings[2] = new Object();
 buildings[2].html = '<img src="images/towers/003.png" class="building" id="building2" />';
 buildings[2].mesh = function() {
+	var refObject = window.tower01Model;
+	newTower = new THREE.Mesh(refObject.geometry, refObject.material);
+	return newTower;
 	return new THREE.Mesh(
 		new THREE.CubeGeometry(tileSize-16, tileSize, tileSize-16),
 		buildingMaterial[2]
@@ -73,6 +82,7 @@ buildings[2].size = new Object();
 buildings[2].size.x = (tileSize-0.25);
 buildings[2].size.y = (tileSize-0.25);
 buildings[2].size.z = (tileSize-0.25);
+buildings[2].heightPos = 0;
 buildings[2].costs = 3;
 buildings[2].stats = new Object();
 buildings[2].stats.speed = 25;
@@ -80,7 +90,7 @@ buildings[2].stats.damage = 4;
 buildings[2].stats.range = 3;
 buildings[2].projectile = function() {
 	return new THREE.Mesh(
-		new THREE.SphereGeometry((tileSize/15), 10, 10),
+		new THREE.SphereGeometry((tileSize/15), 6, 4),
 		buildingMaterial[2]
 	);
 }

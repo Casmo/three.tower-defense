@@ -7,7 +7,8 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 25, currentWave = 0,
 	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0,
-	coins = new Array(), gameStarted = false, healthBars = new Array(), maxWaves = 30;
+	coins = new Array(), gameStarted = false, healthBars = new Array(), maxWaves = 30,
+	tower01;
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -18,7 +19,7 @@ var skyBox = '';
  * Score of the player
  */
 var score = new Object();
-score.currency = 250;
+score.currency = 25;
 score.lives = 20;
 
 /**
@@ -69,29 +70,43 @@ preLoader();
  * Load models before initial the game
  */
 function preLoader() {
-	if (detailLevel == 'low') {
-		init();
-	}
-	else {
-		manager = new THREE.LoadingManager();
-		texture = new THREE.Texture();
-		loader = new THREE.ImageLoader(manager);
-		loader.load('files/models/rock_bottom.jpg', function (image) {
-			texture.image = image;
-			texture.needsUpdate = true;
-		} );
-		loader = new THREE.OBJLoader(manager);
-		loader.load('files/models/rock_bottom.obj', function (object) {
+	manager = new THREE.LoadingManager();
+	texture = new THREE.Texture();
+	loader = new THREE.ImageLoader(manager);
+	loader.load('files/models/rock_bottom.jpg', function (image) {
+		texture.image = image;
+		texture.needsUpdate = true;
+	} );
+
+	textureTower = new THREE.Texture();
+	loader = new THREE.ImageLoader(manager);
+	loader.load('files/models/tower_01.jpg', function (image) {
+		textureTower.image = image;
+		textureTower.needsUpdate = true;
+	} );
 	
+	loader = new THREE.OBJLoader(manager);
+	loader.load('files/models/rock_bottom.obj', function (object) {
+
+		object.traverse( function ( child ) {
+			if ( child instanceof THREE.Mesh ) {
+				child.material.map = texture;
+			}
+		} );
+		rockBottom = object;
+		
+		loader = new THREE.OBJLoader(manager);
+		loader.load('files/models/tower_01.obj', function (object) {
+
 			object.traverse( function ( child ) {
 				if ( child instanceof THREE.Mesh ) {
-					child.material.map = texture;
+					child.material.map = textureTower;
 				}
 			} );
-			rockBottom = object;
+			window.tower01Model = object.children[0];
 			init();
 		} );
-	}
+	} );
 }
 
 /**
@@ -111,7 +126,7 @@ function init() {
 		45,
 		window.innerWidth / window.innerHeight,
 		0.1,
-		10000
+		250
 	);
 	camera.position.x = 90;
 	camera.position.y = boardSize.z;
@@ -138,7 +153,7 @@ function init() {
 	}
 	if (detailLevel == 'high') {
 		sunLight.shadowDarkness = 0.70;
-		sunLight.castShadow = true;
+		sunLight.castShadow = false;
 	}
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
@@ -279,8 +294,8 @@ function render() {
 		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
 		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
 		skyBox.rotation.y += 0.00015;
-		timer = Date.now() * 0.0005;
-		basePosY = Math.sin(timer) * 4;
+		//timer = Date.now() * 0.0005;
+		basePosY = 1; // Math.sin(timer) * 4;
 		floor.position.y = basePosY;
 		rockBottom.position.y = (basePosY) - (boardSize.y / 2);
 	}
@@ -288,12 +303,12 @@ function render() {
 		if (detailLevel == 'high') {
 			tiles[i].position.y = 0.1 + ((boardSize.y / 2) + (basePosY));
 			if (towers[i] != undefined) {
-				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
+				towers[i].position.y = tiles[i].position.y + towers[i].heightPos;
 			}
 		}
 		else {
 			if (towers[i] != undefined && tiles[i].selected != true) {
-				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
+				towers[i].position.y = tiles[i].position.y + towers[i].heightPos;
 			}
 		}
 		if (tiles[i].selected != undefined && tiles[i].selected == true) {
@@ -302,7 +317,7 @@ function render() {
 			tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 2);
 			if (towers[i] != undefined) {
 				// Active tower has to be on top of the selected tile as well (for updating)
-				towers[i].position.y = tiles[i].position.y + (tileSize / 2);
+				towers[i].position.y = tiles[i].position.y + towers[i].heightPos;
 				towers[i].rotation.y += 0.008;
 			}
 		}
@@ -321,10 +336,10 @@ function render() {
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
 		if (detailLevel == 'high') {
-			monsters[i].position.y = (tileSize / 2) + 0.1 + ((boardSize.y / 2) + (basePosY));
+			monsters[i].position.y = (tileSize / 2) + 0.1 + ((boardSize.y / 2));
 		}
 		else {
-			monsters[i].position.y = 0.1 + (boardSize.y / 2);
+			monsters[i].position.y = (tileSize / 2) + 0.1 + ((boardSize.y / 2));
 		}
 		healthBars[i].position.y = monsters[i].position.y + 5;
 		if (tmpMX > monsters[i].position.x) {
@@ -646,7 +661,7 @@ function isInRange(tower, monster) {
 function createBullet(tower, targetIndex, towerIndex) {
 	towers[towerIndex].hasBullet = true;
 	someBullet = tower.projectile;
-	someBullet.position.set(tower.position.x, (tower.position.y + tower.size.y), tower.position.z);
+	someBullet.position.set(tower.position.x, (tower.position.y + 1.3), tower.position.z);
 	someBullet.end = new Object()
 	someBullet.end.x = monsters[targetIndex].position.x;
 	someBullet.end.y = monsters[targetIndex].position.y;
@@ -683,13 +698,14 @@ function build(buildingIndex) {
 			}
 			building = buildings[buildingIndex].mesh();
 			building.position.x = tiles[i].position.x;
-			building.position.y = tiles[i].position.y + (tileSize / 2);
+			building.position.y = tiles[i].position.y; // + (tileSize / 2);
 			building.position.z = tiles[i].position.z;
 			building.stats = buildings[buildingIndex].stats;
 			building.isShooting = false;
 			building.shootingTarget = '';
 			building.projectile = buildings[buildingIndex].projectile();
 			building.size = buildings[buildingIndex].size;
+			building.heightPos = buildings[buildingIndex].heightPos;
 			building.lastShootingTime = Date.now();
 			if (detailLevel == 'high') {
 				building.castShadow = true;
