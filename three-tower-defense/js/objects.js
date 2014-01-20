@@ -5,7 +5,7 @@
 var buildingMaterial = new Array();
 buildingMaterial[0] = new THREE.MeshBasicMaterial({color: 0xff9900});
 buildingMaterial[1] = new THREE.MeshBasicMaterial({color: 0x99ff00});
-buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x9f9f9f});
+buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x626262});
 /**
  * @param array buildings
  * Available buildings to build

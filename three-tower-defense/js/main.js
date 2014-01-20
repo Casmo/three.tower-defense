@@ -107,6 +107,29 @@ function preLoader() {
 			init();
 		} );
 	} );
+	if (devMode == true) {
+		var stats = new Stats();
+		stats.setMode(0); // 0: fps, 1: ms
+
+		// Align top-left
+		stats.domElement.style.position = 'absolute';
+		stats.domElement.style.right = '0px';
+		stats.domElement.style.top = '0px';
+		stats.domElement.style.zIndex = '101';
+
+
+		document.body.appendChild( stats.domElement );
+
+		setInterval( function () {
+
+		    stats.begin();
+
+		    // your code goes here
+
+		    stats.end();
+
+		}, 1000 / 60 );
+	}
 }
 
 /**
@@ -116,7 +139,7 @@ function init() {
 	document.getElementById('lives').innerHTML = score.lives;
 	updateCurrency();
 	scene = new THREE.Scene();
-	renderer = new THREE.WebGLRenderer({antialias:true});
+	renderer = new THREE.WebGLRenderer({antialias:false});
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	if (detailLevel == 'high') {
 		renderer.shadowMapEnabled = true;
@@ -126,7 +149,7 @@ function init() {
 		45,
 		window.innerWidth / window.innerHeight,
 		0.1,
-		250
+		1000
 	);
 	camera.position.x = 90;
 	camera.position.y = boardSize.z;
@@ -153,7 +176,7 @@ function init() {
 	}
 	if (detailLevel == 'high') {
 		sunLight.shadowDarkness = 0.70;
-		sunLight.castShadow = false;
+		sunLight.castShadow = true;
 	}
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
@@ -259,9 +282,9 @@ function init() {
 	// Skybox
 	if (detailLevel == 'high' || detailLevel == 'medium') {
 		imagePrefix = "images/skybox/stars-";
-		directions  = ["xpos", "xneg", "ypos", "yneg", "zpos", "zneg"];
-		imageSuffix = ".png";
-		skyGeometry = new THREE.CubeGeometry(4096, 4096, 4096);	
+		directions  = ["xpos", "xneg", "xpos", "xpos", "xpos", "xpos"];
+		imageSuffix = ".jpg";
+		skyGeometry = new THREE.CubeGeometry(768, 768, 768);	
 		materialArray = [];
 		for (var i = 0; i < 6; i++)
 			materialArray.push( new THREE.MeshBasicMaterial({
@@ -270,7 +293,7 @@ function init() {
 			}));
 		skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 		skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
-		skyBox.position.set(0, 1024, 0);
+		skyBox.position.set(0, 0, 0);
 		scene.add(skyBox);
 	}
 	
@@ -290,12 +313,11 @@ function render() {
 	}
 		
 	if (detailLevel == 'high') {
-		sunLightTimer += 0.00014; // @todo finetune
+		sunLightTimer += 0.00014;
 		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
 		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
 		skyBox.rotation.y += 0.00015;
-		//timer = Date.now() * 0.0005;
-		basePosY = 1; // Math.sin(timer) * 4;
+		basePosY = 1;
 		floor.position.y = basePosY;
 		rockBottom.position.y = (basePosY) - (boardSize.y / 2);
 	}
