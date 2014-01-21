@@ -8,7 +8,7 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	explosions = new Array(), particleCount = 25, currentWave = 0,
 	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0,
 	coins = new Array(), gameStarted = false, healthBars = new Array(), maxWaves = 30,
-	tower01;
+	tower01, basePosY = 0;
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -168,14 +168,14 @@ function init() {
 	
 	// Lights
 	sunLight = new THREE.SpotLight(0xffffff);
-	sunLight.position.set(0 - boardSize.x, 512, 0);
+	sunLight.position.set(-256, 86, 0);
 	scene.add(sunLight);
-	sunLight.intensity = 1.25;
+	sunLight.intensity = 1.80;
 	if (devMode == true) {
 		sunLight.shadowCameraVisible = true;
 	}
 	if (detailLevel == 'high') {
-		sunLight.shadowDarkness = 0.70;
+		sunLight.shadowDarkness = 0.50;
 		sunLight.castShadow = true;
 	}
 	var ambientLight = new THREE.AmbientLight(0x404040);
@@ -225,6 +225,10 @@ function init() {
 	floor.receiveShadow = true;
 	scene.add(floor);
 	
+	basePosY = 1;
+	floor.position.y = basePosY;
+	rockBottom.position.y = (basePosY) - (boardSize.y / 2);
+	
 	// Create tiles
 	var count = 0;
 	for (var x = 0; x < (boardSize.x / tileSize); x++) {
@@ -235,7 +239,7 @@ function init() {
 			
 			tile = new Tile(THREE);
 			tile.position.x = calculateXPosition(x);
-			tile.position.y = boardSize.y / 2;
+			tile.position.y = 0.1 + ((boardSize.y / 2) + (basePosY));
 			tile.position.z = calculateYPosition(y);
 
 			// Make the tile a little smaller to fit nicely on the map
@@ -250,8 +254,6 @@ function init() {
 			if (x == (boardSize.x / tileSize) - 1) {
 				tile.texture = 'images/grass-moss.jpg';
 			}
-			tile.position.y += boardSize.y * 2;
-			tile.position.y = 0.1 + (boardSize.y / 2);
 			tile.create();
 			tiles[count] = tile.getObject();
 			tiles[count].x = x;
@@ -293,7 +295,7 @@ function init() {
 			}));
 		skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 		skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
-		skyBox.position.set(0, 0, 0);
+		skyBox.position.set(0, 128, 0);
 		scene.add(skyBox);
 	}
 	
@@ -311,28 +313,7 @@ function render() {
 		moon.rotation.y += 0.0015;
 		mars.rotation.y -= 0.0020;
 	}
-		
-	if (detailLevel == 'high') {
-		sunLightTimer += 0.00014;
-		sunLight.position.z = Math.cos(sunLightTimer) * 1024;
-		sunLight.position.x = Math.sin(sunLightTimer) * 1024;
-		skyBox.rotation.y += 0.00015;
-		basePosY = 1;
-		floor.position.y = basePosY;
-		rockBottom.position.y = (basePosY) - (boardSize.y / 2);
-	}
 	for (i = 0; i < tiles.length; i++) {
-		if (detailLevel == 'high') {
-			tiles[i].position.y = 0.1 + ((boardSize.y / 2) + (basePosY));
-			if (towers[i] != undefined) {
-				towers[i].position.y = tiles[i].position.y + towers[i].heightPos;
-			}
-		}
-		else {
-			if (towers[i] != undefined && tiles[i].selected != true) {
-				towers[i].position.y = tiles[i].position.y + towers[i].heightPos;
-			}
-		}
 		if (tiles[i].selected != undefined && tiles[i].selected == true) {
 			tiles[i].rotation.z += 0.008;
 			activeTimer = Date.now() * 0.00525;
@@ -341,15 +322,6 @@ function render() {
 				// Active tower has to be on top of the selected tile as well (for updating)
 				towers[i].position.y = tiles[i].position.y + towers[i].heightPos;
 				towers[i].rotation.y += 0.008;
-			}
-		}
-		else {
-			tiles[i].rotation.z = 0;
-			if (towers[i] != undefined) {
-				towers[i].rotation.y = 0;
-			}
-			if (detailLevel == 'medium' || detailLevel == 'low') {
-				tiles[i].position.y = 0.1 + (boardSize.y / 2);
 			}
 		}
 	}
@@ -720,7 +692,7 @@ function build(buildingIndex) {
 			}
 			building = buildings[buildingIndex].mesh();
 			building.position.x = tiles[i].position.x;
-			building.position.y = tiles[i].position.y; // + (tileSize / 2);
+			building.position.y = tiles[i].position.y + building.heightPos;
 			building.position.z = tiles[i].position.z;
 			building.stats = buildings[buildingIndex].stats;
 			building.isShooting = false;
@@ -731,13 +703,13 @@ function build(buildingIndex) {
 			building.lastShootingTime = Date.now();
 			if (detailLevel == 'high') {
 				building.castShadow = true;
+				building.receiveShadow = true;
 			}
 			nodes[tiles[i].x][tiles[i].y].type = 0;
 			if (isValidPath() == false) {
 				nodes[tiles[i].x][tiles[i].y].type = 1;
 			}
 			else {
-				building.receiveShadow = true;
 				towers[i] = building;
 				scene.add(building);
 				score.currency -= buildings[buildingIndex].costs;

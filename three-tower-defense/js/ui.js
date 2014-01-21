@@ -81,6 +81,15 @@ function selectTile(tile) {
  */
 function deselectTiles() {
 	for (i = 0; i < tiles.length; i++) {
+		if (tiles[i].selected == true) {
+			tiles[i].position.y = 0.1 + ((boardSize.y / 2) + (basePosY));
+			tiles[i].rotation.z = 0;
+			if (towers[i] != undefined) {
+				// Active tower has to be on top of the selected tile as well (for updating)
+				towers[i].position.y = tiles[i].position.y + towers[i].heightPos;
+				towers[i].rotation.y = 0;
+			}
+		}
 		tiles[i].selected = false;
 	}
 }
