@@ -840,21 +840,6 @@ function updateCurrency() {
 	document.getElementById('currency').innerHTML = score.currency;
 }
 
-function showBuildingInfo(building) {
-	infoHtml = 'Cost: <b>' + buildings[building].costs +'</b><br />';
-	infoHtml += 'Damage: <b>' + buildings[building].stats.damage +'</b><br />';
-	infoHtml += 'Speed: <b>' + buildings[building].stats.speed +'</b><br />';
-	infoHtml += 'Range: <b>' + buildings[building].stats.range +'</b>';
-	document.getElementById('info-box').style.display = 'block';
-	document.getElementById('info-box').innerHTML = infoHtml;
-	document.getElementById('info-box').style.display = 'block';
-	
-}
-function hideBuildingInfo() {
-	document.getElementById('info-box').style.display = 'none';
-	document.getElementById('info-box').innerHTML = '';
-}
-
 /**
  * Callback when the player resizes the current browser window.
  */
