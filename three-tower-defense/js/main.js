@@ -5,9 +5,9 @@
  */
 var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
-	explosions = new Array(), particleCount = 25, currentWave = 0,
-	waveSeconds = 20, waveTimer = new Date().getTime() / 1000, addExtraHP = 0,
-	coins = new Array(), gameStarted = false, healthBars = new Array(), maxWaves = 30,
+	explosions = new Array(), particleCount = 25, currentWave = 0, currentMonsters = 0,
+	addExtraHP = 0,	coins = new Array(), gameStarted = false,
+	healthBars = new Array(), maxWaves = 30,
 	tower01, basePosY = 0;
 /**
  * @param object skyBox
@@ -329,12 +329,6 @@ function render() {
 	monsters.forEach(function(monster, i, theArray) {
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
-		if (detailLevel == 'high') {
-			monsters[i].position.y = (tileSize / 2) + 0.1 + ((boardSize.y / 2));
-		}
-		else {
-			monsters[i].position.y = (tileSize / 2) + 0.1 + ((boardSize.y / 2));
-		}
 		healthBars[i].position.y = monsters[i].position.y + 5;
 		if (tmpMX > monsters[i].position.x) {
 			monsters[i].position.x += monsters[i].stats.speed;
@@ -451,14 +445,10 @@ function render() {
 		}
 	});
 	if (gameStarted == true) {
-		spawningMonstersTime = ((new Date().getTime() / 1000) - waveTimer);
-		if (spawningMonstersTime > waveSeconds) {
-			spawnWave();
+		if (currentWave <= maxWaves && score.lives > 0) {
+			document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave) +'.';
 		}
-		if (currentWave <= 25 && score.lives > 0) {
-			document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave) +', next wave in '+ Math.round(waveSeconds - spawningMonstersTime) +' seconds';
-		}
-		else if (currentWave <= 25 && score.lives <= 0) {
+		else if (currentWave <= maxWaves && score.lives <= 0) {
 			document.getElementById('spawn-timer').innerHTML = 'You did not survive. Try again!';
 		}
 	}
@@ -490,7 +480,7 @@ function spawnMonster(tile, extraStats) {
 	}
 	monster = new Monster(THREE);
 	monster.position.x = tile.position.x;
-	monster.position.y = tile.position.y + monster.size.y + tile.size.y;
+	monster.position.y = basePosY + tile.position.y + (monster.size.y / 5.5);
 	monster.position.z = tile.position.z;
 	monster.create();
 	monsterObject = monster.getObject();
@@ -578,6 +568,10 @@ function deleteMonster(index, removeLife) {
 	scene.remove(monsters[index]);
 	delete monsters[index];
 	delete healthBars[index];
+	currentMonsters--;
+	if (currentMonsters <= 0) {
+		setTimeout(function() { spawnWave(); }, 5000);
+	}
 }
 
 /**
