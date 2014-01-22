@@ -444,14 +444,6 @@ function render() {
 			delete coins[index];
 		}
 	});
-	if (gameStarted == true) {
-		if (currentWave <= maxWaves && score.lives > 0) {
-			document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave) +'.';
-		}
-		else if (currentWave <= maxWaves && score.lives <= 0) {
-			document.getElementById('spawn-timer').innerHTML = 'You did not survive. Try again!';
-		}
-	}
 	renderer.render(scene, camera);
 }
 
@@ -476,6 +468,7 @@ function spawnMonster(tile, extraStats) {
 		return false;
 	}
 	if (tile == undefined) {
+		currentMonsters--;
 		return false;
 	}
 	monster = new Monster(THREE);
@@ -570,7 +563,7 @@ function deleteMonster(index, removeLife) {
 	delete healthBars[index];
 	currentMonsters--;
 	if (currentMonsters <= 0) {
-		setTimeout(function() { spawnWave(); }, 5000);
+		setTimeout(function() { spawnWave(); }, 3500);
 	}
 }
 

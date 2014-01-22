@@ -1,5 +1,6 @@
 function spawnWave() {
 	currentWave++;
+	document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave) +'.';
 	if (currentWave > maxWaves) {
 		if (score.lives > 0) {
 			document.getElementById('spawn-timer').innerHTML = 'You survived!';
@@ -20,13 +21,19 @@ function spawnWave() {
 	someStats.hp_100 = someStats.hp;
 	
 	someStats.speed = 0.125;
+	if (currentWave > 6) {
+		someStats.speed = 0.250;
+	}
+	if (currentWave > 12) {
+		someStats.speed = 0.5;
+	}
 	if (someStats.speed > 10) {
 		someStats.speed = 10;
 	}
 	someStats.currency = 1;
-	timePerMonsterInMs = 1250;
+	timePerMonsterInMs = 650;
 	timeOut = 0;
-	for (i = 0; i < countMonsters; i++) {
+	for (i = 0; i < currentMonsters; i++) {
 		timeOut = timeOut + timePerMonsterInMs;
 		setTimeout(function() { spawnMonster(tilesSizes[0][Math.floor(Math.random() * maxY)], someStats) }, timeOut);
 	}
