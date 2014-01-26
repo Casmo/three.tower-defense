@@ -8,7 +8,7 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	explosions = new Array(), particleCount = 25, currentWave = 0, currentMonsters = 0,
 	addExtraHP = 0,	coins = new Array(), gameStarted = false,
 	healthBars = new Array(), maxWaves = 30,
-	tower01, basePosY = 0;
+	tower01, basePosY = 0, bulletTweens = new Array();
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -85,6 +85,13 @@ function preLoader() {
 		textureTower.needsUpdate = true;
 	} );
 	
+	textureTower02 = new THREE.Texture();
+	loader = new THREE.ImageLoader(manager);
+	loader.load('files/models/tower_02.jpg', function (image) {
+		textureTower02.image = image;
+		textureTower02.needsUpdate = true;
+	} );
+	
 	loader = new THREE.OBJLoader(manager);
 	loader.load('files/models/rock_bottom.obj', function (object) {
 
@@ -104,7 +111,17 @@ function preLoader() {
 				}
 			} );
 			window.tower01Model = object.children[0];
-			init();
+			loader = new THREE.OBJLoader(manager);
+			loader.load('files/models/tower_02.obj', function (object) {
+
+				object.traverse( function ( child ) {
+					if ( child instanceof THREE.Mesh ) {
+						child.material.map = textureTower02;
+					}
+				} );
+				window.tower02Model = object.children[0];
+				init();
+			} );
 		} );
 	} );
 	if (devMode == true) {
@@ -378,6 +395,13 @@ function render() {
 	towers.forEach(function(tower, key, theArray) {
 		shootAtMonsterInRange(tower, key);
 	});
+
+	bullets.forEach(function(bullet, i, theArray) {
+		bullets[i].position.x = bulletTweens[i].stop.x;
+		bullets[i].position.y = bulletTweens[i].stop.y;
+		bullets[i].position.z = bulletTweens[i].stop.z;
+	});
+	/*
 	bullets.forEach(function(bullet, i, theArray) {
 		bullets[i].position.x += bullet.speed.x;
 		bullets[i].position.y += bullet.speed.y;
@@ -399,17 +423,22 @@ function render() {
 				if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
 					deleteMonster(bullets[i].targetIndex, false);
 				}
-				towers[bullet.towerIndex].hasBullet = false;
+				if (typeof towers[bullet.towerIndex].hasBullet != 'undefined') {
+					towers[bullet.towerIndex].hasBullet = false;
+				}
 				scene.remove(bullets[i]);
 				delete bullets[i];
 			}
 		}
 		else if(bullets[i].lifeTime <= 0) {
-			towers[bullet.towerIndex].hasBullet = false;
+			if (typeof towers[bullet.towerIndex].hasBullet != 'undefined') {
+				towers[bullet.towerIndex].hasBullet = false;
+			}
 			scene.remove(bullets[i]);
 			delete bullets[i];
 		}
-	});
+	})
+	*/;
 	for (i = 0; i < explosions.length; i++) {
 		removeParticleSystem = false;
 		for (p = 0; p < particleCount; p++) {
@@ -444,6 +473,7 @@ function render() {
 			delete coins[index];
 		}
 	});
+	TWEEN.update();
 	renderer.render(scene, camera);
 }
 
@@ -573,7 +603,8 @@ function deleteMonster(index, removeLife) {
  * @param towerIndex the index (array key) of the tower
  */
 function shootAtMonsterInRange(tower, towerIndex) {
-	if (typeof(tower.lastShootingTime) == 'undefined' || ((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
+	//if (typeof(tower.lastShootingTime) == 'undefined' || ((Date.now() - tower.lastShootingTime) / 30) > tower.stats.speed) {
+	if (typeof tower.hasBullet == 'undefined' || tower.hasBullet == false) {
 		// Let's check if it has to shoot
 		towers[towerIndex].lastShootingTime = Date.now();
 		// Check if the last monster is still in range, if there is a last target
@@ -640,22 +671,62 @@ function isInRange(tower, monster) {
  * Create a bullet at the tower spot and move it to the monster.
  */
 function createBullet(tower, targetIndex, towerIndex) {
+	newTween = new Object();
 	towers[towerIndex].hasBullet = true;
 	someBullet = tower.projectile;
-	someBullet.position.set(tower.position.x, (tower.position.y + 1.3), tower.position.z);
+	someBullet.position.set(tower.position.x, (tower.position.y + someBullet.startY), tower.position.z);
 	someBullet.end = new Object()
 	someBullet.end.x = monsters[targetIndex].position.x;
 	someBullet.end.y = monsters[targetIndex].position.y;
 	someBullet.end.z = monsters[targetIndex].position.z;
+	start = someBullet.position;
+	end = someBullet.end;
+	someTween = new TWEEN.Tween(start).to(end, 200);
+	if (someBullet.easing == 'Back.Out') {
+		someTween.easing(TWEEN.Easing.Back.Out);
+	}
+	else if (someBullet.easing == 'Quadratic.In') {
+		someTween.easing(TWEEN.Easing.Quadratic.In);
+	}
+	someTween.bulletIndex = bullets.length;
+	someTween.onComplete(function() {
+		removeBullet(someTween.bulletIndex);
+	});
+	someTween.start();
+	bulletTweens.push(someTween);
+/*
 	bulletSpeed = 1.75;
-	someBullet.lifeTime = 120;
+	someBullet.lifeTime = 160;
 	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
 	someBullet.speed = speed;
+*/
 	someBullet.stats = tower.stats;
 	someBullet.targetIndex = targetIndex;
 	someBullet.towerIndex = towerIndex;
 	bullets.push(someBullet);
 	scene.add(bullets[bullets.length-1]);
+	setTimeout(function() {
+		if (towers[towerIndex] != undefined) {
+			towers[towerIndex].hasBullet = false;
+		}
+	}, someBullet.stats.speed);
+}
+
+function removeBullet(index) {
+	if (typeof bullets[index] == 'undefined') {
+		return false;
+	}
+	bullet = bullets[index];
+	if (monsters[bullet.targetIndex] != undefined) {
+		monsters[bullet.targetIndex].stats.hp -= bullet.stats.damage;
+		percent = 100 / (monsters[bullet.targetIndex].stats.hp_100 / monsters[bullet.targetIndex].stats.hp);
+		healthBars[bullet.targetIndex].scale.x = 1 / 100 * percent;
+	}
+	if (monsters[bullet.targetIndex] != undefined && monsters[bullet.targetIndex].stats.hp <= 0) {
+		deleteMonster(bullet.targetIndex, false);
+	}
+	scene.remove(bullets[index]);
+	delete bullets[index];
 }
 
 /**
