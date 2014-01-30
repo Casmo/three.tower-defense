@@ -60,6 +60,14 @@ function showBuildmenu(tile) {
     }
 }
 
+function showMenu() {
+	document.getElementById('main-menu').style.display = 'block';
+}
+
+function hideMenu() {
+	document.getElementById('main-menu').style.display = 'none';
+}
+
 /**
  * Hide build menu
  */
@@ -100,7 +108,8 @@ function showBuildingInfo(building) {
 		style = "color: red;";
 	}
 	infoHtml = 'Cost: <b style="'+ style +'">' + buildings[building].costs +'</b><br />';
-	infoHtml += 'Damage: <b>' + buildings[building].stats.damage +'</b><br />';
+	dps = Math.round(buildings[building].stats.damage / buildings[building].stats.speed * 1000);
+	infoHtml += 'Damage: <b>' + buildings[building].stats.damage +'</b> ('+ dps +' dps)<br />';
 	infoHtml += 'Speed: <b>' + (buildings[building].stats.speed/1000) +' sec.</b><br />';
 	infoHtml += 'Range: <b>' + buildings[building].stats.range +'</b>';
 	document.getElementById('info-box').style.display = 'block';

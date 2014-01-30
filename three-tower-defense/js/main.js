@@ -319,10 +319,7 @@ function init() {
 	projector = new THREE.Projector();
 	buildMenu = document.getElementById('buildmenu');
 	animate();
-	document.getElementById('spawn-timer').innerHTML = '<a href="#top" class="start-game" id="startbutton">Start game</a>';
-	document.getElementById('startbutton').addEventListener('click', function() {
-		startGame();
-    });
+	document.getElementById('spawn-timer').innerHTML = '<a href="#top" onclick="startGame();"><img id="startbutton" src="images/menu-start.png"></a>';
 }
 
 function render() {
@@ -681,17 +678,15 @@ function createBullet(tower, targetIndex, towerIndex) {
 	someBullet.end.z = monsters[targetIndex].position.z;
 	start = someBullet.position;
 	end = someBullet.end;
-	someTween = new TWEEN.Tween(start).to(end, 200);
+	someTween = new TWEEN.Tween(start).to(end, 300);
 	if (someBullet.easing == 'Back.Out') {
 		someTween.easing(TWEEN.Easing.Back.Out);
 	}
 	else if (someBullet.easing == 'Quadratic.In') {
 		someTween.easing(TWEEN.Easing.Quadratic.In);
 	}
-	someTween.bulletIndex = bullets.length;
-	someTween.onComplete(function() {
-		removeBullet(someTween.bulletIndex);
-	});
+	var currentIndex = bullets.length;
+	setTimeout(function(){removeBullet(currentIndex)}, 300);
 	someTween.start();
 	bulletTweens.push(someTween);
 /*
