@@ -1,6 +1,6 @@
 function spawnWave() {
 	currentWave++;
-	document.getElementById('spawn-timer').innerHTML = 'Wave #' + (currentWave) +'.';
+	document.getElementById('spawn-timer').innerHTML = currentWave;
 	if (currentWave > maxWaves) {
 		if (score.lives > 0) {
 			document.getElementById('spawn-timer').innerHTML = 'You survived!';

@@ -26,7 +26,7 @@ function showBuildmenu(tile) {
 	building1 = document.getElementById('building1');
 	building2 = document.getElementById('building2');
 	buildingDestroy = document.getElementById('buildingDestroy');
-	building0.addEventListener('click', function() {
+	building0.addEventListener('mousedown', function() {
 		build(0);
     });
 	building0.addEventListener('mouseover', function() {
@@ -35,7 +35,7 @@ function showBuildmenu(tile) {
 	building0.addEventListener('mouseout', function() {
 		hideBuildingInfo();
     });
-	building1.addEventListener('click', function() {
+	building1.addEventListener('mousedown', function() {
 		build(1);
     });
 	building1.addEventListener('mouseover', function() {
@@ -44,7 +44,7 @@ function showBuildmenu(tile) {
 	building1.addEventListener('mouseout', function() {
 		hideBuildingInfo();
     });
-	building2.addEventListener('click', function() {
+	building2.addEventListener('mousedown', function() {
 		build(2);
     });
 	building2.addEventListener('mouseover', function() {
@@ -59,13 +59,32 @@ function showBuildmenu(tile) {
 	    });
     }
 }
+buttonAbout = document.getElementById('button_about');
+buttonAbout.addEventListener('click', function() {
+	showHideAbout();
+});
 
-function showMenu() {
-	document.getElementById('main-menu').style.display = 'block';
-}
+aboutInfo = document.getElementById('about_info');
+aboutInfo.addEventListener('click', function() {
+	showHideAbout();
+});
+buttonReset = document.getElementById('button_reset');
+buttonReset.addEventListener('click', function() {
+	if (confirm("Reset game?")) {
+		location.href = location.href;
+	}
+});
+startButton = document.getElementById('startbutton');
+startButton.addEventListener('click', function() {
+	startGame();
+});
 
-function hideMenu() {
-	document.getElementById('main-menu').style.display = 'none';
+function showHideAbout() {
+	show = 'block';
+	if (document.getElementById('about_info').style.display == 'block') {
+		show = 'none';
+	}
+	document.getElementById('about_info').style.display = show;
 }
 
 /**

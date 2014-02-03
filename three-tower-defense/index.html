@@ -8,7 +8,6 @@
     <script src="js/OrbitControls.js"></script>
     <script src="js/OBJLoader.js"></script>
     <script src="js/settings.js"></script>
-    <script src="js/ui.js"></script>
     <script src="js/objects.js"></script>
     <script src="js/monsters.js"></script>
     <script src="js/waves.js"></script>
@@ -19,22 +18,31 @@
 </head>
 <body>
     <div class="top-nav">
-        <div id="spawn-timer"></div>
-        <div id="lives"></div>
-        <div id="currency"></div>
-        <div id="menu"><a href="#topmenu" onclick="showMenu();"><img src="images/menu-menu.png" border="0"></a></div>
+        <div class="currencies">
+            <div><img src="images/ui-currency.png"><span id="currency"></span></div>
+            <div><img src="images/ui-lives.png"><span id="lives"></span></div>
+            <div class="sub">v. 0.6.1</div>
+        </div>
+        <div id="menu">
+            <img style="cursor: pointer;" src="images/menu-about.png" border="0" id="button_about">
+            <img style="cursor: pointer;" src="images/menu-reset.png" border="0" id="button_reset">
+        </div>
+        <div id="spawn-timer"><a id="startbutton" style="cursor: pointer;">GO</a></div>
     </div>
-    <div id="game"></div>
+    <div id="game">Loading...</div>
     <div class="bottom-nav">
         <div id="buildmenu"></div>
         <div id="info-box"></div>
     </div>
-    <div id="main-menu">
-        <img src="images/menu-options.png">
-        <a href="http://www.fellicht.nl/" target="_blank"><img src="images/menu-credits.png"></a>
-        <br /><br />
-        <a href="#topclick" onclick="hideMenu();"><img src="images/menu-resume.png"></a>
+    <div id="about_info">
+        <p><b>Defend your world from chaos in this Tower Defense!</b></p>
+        <p>In Order Tower Defense you are the master builder and have the important task to build your defenses against chaos. Killing monsters will give you great awards and unlocks more powerful weapons, but keep an eye out on your life... Not every master crafter is build for an eternity!</p>
+        <p><b>Who are we?</b><br />
+        We are two independent Game Developers (Mathieu &amp; Timothy) from The Netherlands and love designing and developing small games. Beginning 2014 we started creating this Tower Defense as a first experiment. Please send your comments to <a href="mailto:mathieu@fellicht.nl">mathieu@fellicht.nl</a> and rate our game on the Google Chrome web store. It really helps!
+        </p>
+        <p><a href="http://www.fellicht.nl" target="_blank">www.fellicht.nl</a></p>
     </div>
+    <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

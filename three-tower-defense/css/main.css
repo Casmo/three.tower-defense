@@ -1,44 +1,55 @@
 * { margin: 0px; padding: 0px; }
 body { overflow: hidden; font-family: arial, verdana, sans, sans-serif; color: #a26412; font-size: 14px; }
 canvas { width: 100%; height: 100%; }
-a { text-decoration: none; color: #f90; }
+a { text-decoration: none; color: #000; }
 a:hover { color: #fff; }
 .top-nav, #game, .bottom-nav {
     width: 100%;
 	position: absolute;
 	z-index: 1;
 }
-.top-nav #menu {
-	float: right;
-	margin-right: 10px;
+.top-nav #menu img {
+	margin-left: 10px;
 	margin-top: 10px;
 } 
-.top-nav, .bottom-nav {
-    height: 78px;
+.top-nav {
+    height: 48px;
 	z-index: 2;
-	background-image: url(../images/background.png);
+	background-image: url(../images/menu-background.png);
+    top: 0px;
+    border-bottom: 3px solid #000;
 }
 .bottom-nav {
     height: 120px;
+    background-image: url(../images/building-background.png);
 }
-.top-nav {
-	top: 0px;
-	border-bottom: 3px solid #000;
-}
-#main-menu {
+#about_info {
+	font-size: 14px;
+	line-height: 20px;
 	position: absolute;
 	display: none;
 	z-index: 100;
-	width: 251px;
-	height: 252px;
+	padding: 20px;
+	color: #fff;
+	text-shadow: 0px 1px 1px rgba(0,0,0,0.7);
+	width: 466px;
+	height: 320px;
 	left: 50%;
 	top: 50%;
-	margin-left: -175px;
-	margin-top: -196px;
+	margin-left: -258px;
+	margin-top: -180px;
 	background-image: url(../images/ui-menu-background.png);
 	background-repeat: no-repeat;
-	text-align: center;
-	padding-top: 40px;
+	text-align: left;
+}
+#about_info a {
+	color: #fff;
+}
+#about_info p {
+	margin-bottom: 20px;
+}
+#about_info p:last {
+	margin-bottom: 0px;
 }
 .bottom-nav {
 	bottom: 0px;
@@ -74,31 +85,41 @@ a:hover { color: #fff; }
 	text-align: center;
 	position: absolute;
 	left: 50%;
-	width: 400px;
+	height: 96px;
+	width: 96px;
 	font-size: 22px;
 	font-weight: bold;
-	color: #fff;
-	margin-left: -200px;
-	line-height: 58px;
-	top: 10px;
+	color: #000;
+	text-shadow: 0px 0px 1px rgba(0,0,0,0.2);
+	margin-left: -48px;
+	line-height: 96px;
+	top: 0px;
+	z-index: 3;
+	background-image: url(../images/spawn-background.png);
 }
-#lives, #currency {
-	display: inline-block;
-	margin-left: 20px;
-	margin-top: 20px;
-	position: relative;
-	height: 36px;
-	font-weight: bold;
-	line-height: 36px;
-	font-size: 22px;
-	text-left: center;
-	padding-left: 46px;
-	min-width: 150px;
-	background-repeat: no-repeat;
-	background-image: url(../images/ui-lives.png);
+.currencies {
+	float: right;
+	margin-top: 8px;
+	margin-right: 10px;
 }
-#currency {
-    background-image: url(../images/ui-currency.png);
+.currencies div {
+    display: inline-block;
+    margin-left: 10px;
+    background-image: url(../images/currency-background.png);
+    width: 110px;
+    line-height: 18px;
+    height: 25px;
+    padding: 7px 10px 0px 10px;
+    text-align: right;
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 0px 0px 1px rgba(0,0,0,0.2);
+}
+.currencies div.sub {
+	color: #555;
+}
+.currencies div img {
+	float: left;
 }
 
 #info-box {
@@ -109,7 +130,7 @@ a:hover { color: #fff; }
 	margin-left: -125px;
 	bottom: 130px;
 	padding: 10px;
-    background-image: url(../images/background.png);
-	border: 5px solid #a26412;
+    background-image: url(../images/building-background.png);
+    border: 2px solid #000;
 	
 }

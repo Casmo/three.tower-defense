@@ -177,7 +177,7 @@ function init() {
 	
 	// Listerners
 	window.addEventListener('resize', onWindowResize, false);
-	document.addEventListener('mousedown', onDocumentMouseDown, false);
+	document.addEventListener('mouseup', onDocumentMouseUp, false);
 	
 	// Camera controls
 	controls = new THREE.OrbitControls(camera);
@@ -319,7 +319,6 @@ function init() {
 	projector = new THREE.Projector();
 	buildMenu = document.getElementById('buildmenu');
 	animate();
-	document.getElementById('spawn-timer').innerHTML = '<a href="#top" onclick="startGame();"><img id="startbutton" src="images/menu-start.png"></a>';
 }
 
 function render() {
@@ -921,7 +920,7 @@ function onWindowResize() {
  * @todo I would like to have this only activated when the player clicked UP & DOWN
  * on the tile instead of just UP or DOWN.
  */
-function onDocumentMouseDown(event) {
+function onDocumentMouseUp(event) {
     event.preventDefault();
     var vector = new THREE.Vector3( 
         (event.clientX / window.innerWidth) * 2 - 1, 
