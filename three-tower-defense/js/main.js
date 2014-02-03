@@ -8,7 +8,49 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	explosions = new Array(), particleCount = 25, currentWave = 0, currentMonsters = 0,
 	addExtraHP = 0,	coins = new Array(), gameStarted = false,
 	healthBars = new Array(), maxWaves = 30,
-	tower01, basePosY = 0, bulletTweens = new Array();
+	tower01, basePosY = 0, bulletTweens = new Array(), monsterIntervals = new Array();
+
+function newGame() {
+	gameStarted = false;
+	towers.forEach(function(tower, key, theArray) {
+		destroyTower(key);
+	});
+	monsters.forEach(function(monster, key, theArray) {
+		deleteMonster(key, false);
+	});
+	coins.forEach(function(coin, index) {
+		scene.remove(coins[index]);
+		delete coins[index];
+	});
+	bullets.forEach(function(bullet, index) {
+		scene.remove(bullets[index]);
+		delete bullets[index];
+	});
+	monsterIntervals.forEach(function(interval, index) {
+		clearTimeout(monsterIntervals[index]);
+	});
+	monsterIntervals = new Array();
+	bullets = new Array();
+	healthBars = new Array();
+	monsters = new Array();
+	towers = new Array();
+	sunLightTimer = 300;
+	monsterModels = new Array();
+	//explosions = new Array();
+	currentWave = 0;
+	currentMonsters = 0;
+	addExtraHP = 0;
+	coins = new Array();
+	maxWaves = 30;
+	bulletTweens = new Array();
+	score.currency = 25;
+	score.lives = 20;
+	document.getElementById('spawn_waves').innerHTML = 'START GAME';
+	document.getElementById('spawn_percent').style.width = '1%';
+	deselectTiles();
+	document.getElementById('lives').innerHTML = score.lives;
+	updateCurrency();
+}
 /**
  * @param object skyBox
  * The skybox of the envoirement. Can be animated
@@ -397,44 +439,6 @@ function render() {
 		bullets[i].position.y = bulletTweens[i].stop.y;
 		bullets[i].position.z = bulletTweens[i].stop.z;
 	});
-	/*
-	bullets.forEach(function(bullet, i, theArray) {
-		bullets[i].position.x += bullet.speed.x;
-		bullets[i].position.y += bullet.speed.y;
-		bullets[i].position.z += bullet.speed.z;
-		bullets[i].lifeTime--;
-
-		if (monsters[bullets[i].targetIndex] != undefined) {
-			vector = new Object();
-			vector.x = monsters[bullets[i].targetIndex].position.x - bullets[i].position.x;
-			vector.z = monsters[bullets[i].targetIndex].position.z - bullets[i].position.z;
-			
-			distance = Math.sqrt(vector.x * vector.x + vector.z * vector.z);
-			if (distance <= 4 || distance >= (boardSize.x + boardSize.y)) {
-				if (monsters[bullets[i].targetIndex] != undefined) {
-					monsters[bullets[i].targetIndex].stats.hp -= bullets[i].stats.damage;
-					percent = 100 / (monsters[bullets[i].targetIndex].stats.hp_100 / monsters[bullets[i].targetIndex].stats.hp);
-					healthBars[bullets[i].targetIndex].scale.x = 1 / 100 * percent;
-				}
-				if (monsters[bullets[i].targetIndex] != undefined && monsters[bullets[i].targetIndex].stats.hp <= 0) {
-					deleteMonster(bullets[i].targetIndex, false);
-				}
-				if (typeof towers[bullet.towerIndex].hasBullet != 'undefined') {
-					towers[bullet.towerIndex].hasBullet = false;
-				}
-				scene.remove(bullets[i]);
-				delete bullets[i];
-			}
-		}
-		else if(bullets[i].lifeTime <= 0) {
-			if (typeof towers[bullet.towerIndex].hasBullet != 'undefined') {
-				towers[bullet.towerIndex].hasBullet = false;
-			}
-			scene.remove(bullets[i]);
-			delete bullets[i];
-		}
-	})
-	*/;
 	for (i = 0; i < explosions.length; i++) {
 		removeParticleSystem = false;
 		for (p = 0; p < particleCount; p++) {
@@ -588,7 +592,7 @@ function deleteMonster(index, removeLife) {
 	delete monsters[index];
 	delete healthBars[index];
 	currentMonsters--;
-	if (currentMonsters <= 0) {
+	if (currentMonsters <= 0 && gameStarted == true) {
 		setTimeout(function() { spawnWave(); }, 3500);
 	}
 }
@@ -688,12 +692,6 @@ function createBullet(tower, targetIndex, towerIndex) {
 	setTimeout(function(){removeBullet(currentIndex)}, 300);
 	someTween.start();
 	bulletTweens.push(someTween);
-/*
-	bulletSpeed = 1.75;
-	someBullet.lifeTime = 160;
-	speed = calculateBulletSpeed(someBullet.position, someBullet.end, bulletSpeed);
-	someBullet.speed = speed;
-*/
 	someBullet.stats = tower.stats;
 	someBullet.targetIndex = targetIndex;
 	someBullet.towerIndex = towerIndex;

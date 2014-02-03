@@ -1,12 +1,17 @@
 function spawnWave() {
+	if (gameStarted == false) {
+		return true;
+	}
 	currentWave++;
-	document.getElementById('spawn-timer').innerHTML = currentWave;
+	document.getElementById('spawn_waves').innerHTML = currentWave +'/' + maxWaves;
+	percent = 100 / maxWaves * currentWave;
+	document.getElementById('spawn_percent').style.width = percent +'%';
 	if (currentWave > maxWaves) {
 		if (score.lives > 0) {
-			document.getElementById('spawn-timer').innerHTML = 'You survived!';
+			document.getElementById('spawn_waves').innerHTML = 'Survived!';
 		}
 		else {
-			document.getElementById('spawn-timer').innerHTML = 'You did not survive. Try again!';
+			document.getElementById('spawn_waves').innerHTML = 'Failed!';
 		}
 		return true;
 	}
@@ -35,6 +40,7 @@ function spawnWave() {
 	timeOut = 0;
 	for (i = 0; i < currentMonsters; i++) {
 		timeOut = timeOut + timePerMonsterInMs;
-		setTimeout(function() { spawnMonster(tilesSizes[0][Math.floor(Math.random() * maxY)], someStats) }, timeOut);
+		interval = setTimeout(function() { spawnMonster(tilesSizes[0][Math.floor(Math.random() * maxY)], someStats) }, timeOut);
+		monsterIntervals.push(interval);
 	}
 }

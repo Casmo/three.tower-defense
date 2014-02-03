@@ -70,13 +70,13 @@ aboutInfo.addEventListener('click', function() {
 });
 buttonReset = document.getElementById('button_reset');
 buttonReset.addEventListener('click', function() {
-	if (confirm("Reset game?")) {
-		location.href = location.href;
-	}
+	newGame();
 });
-startButton = document.getElementById('startbutton');
+startButton = document.getElementById('spawn_waves');
 startButton.addEventListener('click', function() {
-	startGame();
+	if (gameStarted == false) {
+		startGame();
+	}
 });
 
 function showHideAbout() {
