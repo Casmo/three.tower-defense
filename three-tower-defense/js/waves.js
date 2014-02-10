@@ -6,7 +6,7 @@ function spawnWave() {
 	document.getElementById('spawn_waves').innerHTML = currentWave +'/' + maxWaves;
 	percent = 100 / maxWaves * currentWave;
 	document.getElementById('spawn_percent').style.width = percent +'%';
-	if (currentWave > maxWaves) {
+	if (currentWave > maxWaves || score.lives <= 0) {
 		if (score.lives > 0) {
 			document.getElementById('spawn_waves').innerHTML = 'Survived!';
 		}

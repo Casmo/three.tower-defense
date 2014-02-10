@@ -5,7 +5,7 @@
 var buildingMaterial = new Array();
 buildingMaterial[0] = new THREE.MeshBasicMaterial({color: 0x626262});
 buildingMaterial[1] = new THREE.MeshBasicMaterial({color: 0xff9900});
-buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0x99ff00});
+buildingMaterial[2] = new THREE.MeshBasicMaterial({color: 0xff0000});
 /**
  * @param array buildings
  * Available buildings to build
@@ -48,10 +48,6 @@ buildings[1].mesh = function() {
 	var refObject = window.tower02Model;
 	newTower = new THREE.Mesh(refObject.geometry, refObject.material);
 	return newTower;
-	return new THREE.Mesh(
-	new THREE.CylinderGeometry(0, (tileSize/2), tileSize, 3, 1),
-		buildingMaterial[1]
-	);
 }
 buildings[1].size = new Object();
 buildings[1].size.x = (tileSize-0.25);
@@ -76,16 +72,15 @@ buildings[1].projectile = function() {
 buildings[2] = new Object();
 buildings[2].html = '<img src="images/towers/003.png" class="building" id="building2" />';
 buildings[2].mesh = function() {
-	return new THREE.Mesh(
-		new THREE.SphereGeometry((tileSize/2), 16, 16),
-		buildingMaterial[2]
-	);
+	var refObject = window.tower03Model;
+	newTower = new THREE.Mesh(refObject.geometry, refObject.material);
+	return newTower;
 }
 buildings[2].size = new Object();
 buildings[2].size.x = (tileSize-0.25);
 buildings[2].size.y = (tileSize-0.25);
 buildings[2].size.z = (tileSize-0.25);
-buildings[2].heightPos = (tileSize / 2);
+buildings[2].heightPos = 0;
 buildings[2].costs = 30;
 buildings[2].stats = new Object();
 buildings[2].stats.speed = 800;
@@ -93,10 +88,10 @@ buildings[2].stats.damage = 36;
 buildings[2].stats.range = 6;
 buildings[2].projectile = function() {
 	bullet = new THREE.Mesh(
-		new THREE.SphereGeometry((tileSize/7), 10, 10),
+		new THREE.SphereGeometry((tileSize/20), 6, 4),
 		buildingMaterial[2]
 	);
-	bullet.startY = 1.8;
+	bullet.startY = 8.25;
 	bullet.easing = 'Linear.None';
 	return bullet;
 }

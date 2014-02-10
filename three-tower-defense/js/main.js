@@ -134,6 +134,13 @@ function preLoader() {
 		textureTower02.needsUpdate = true;
 	} );
 	
+	textureTower03 = new THREE.Texture();
+	loader = new THREE.ImageLoader(manager);
+	loader.load('files/models/tower_03.jpg', function (image) {
+		textureTower03.image = image;
+		textureTower03.needsUpdate = true;
+	} );
+	
 	loader = new THREE.OBJLoader(manager);
 	loader.load('files/models/rock_bottom.obj', function (object) {
 
@@ -162,7 +169,18 @@ function preLoader() {
 					}
 				} );
 				window.tower02Model = object.children[0];
-				init();
+
+				loader = new THREE.OBJLoader(manager);
+				loader.load('files/models/tower_03.obj', function (object) {
+
+					object.traverse( function ( child ) {
+						if ( child instanceof THREE.Mesh ) {
+							child.material.map = textureTower03;
+						}
+					} );
+					window.tower03Model = object.children[0];
+					init();
+				});
 			} );
 		} );
 	} );
@@ -233,10 +251,8 @@ function init() {
 	if (devMode == true) {
 		sunLight.shadowCameraVisible = true;
 	}
-	if (detailLevel == 'high') {
-		sunLight.shadowDarkness = 0.50;
-		sunLight.castShadow = true;
-	}
+	sunLight.shadowDarkness = 0.20;
+	sunLight.castShadow = true;
 	var ambientLight = new THREE.AmbientLight(0x404040);
 	scene.add(ambientLight);
 	rockBottom.scale.x = 0.125;
@@ -345,7 +361,7 @@ function init() {
 		imagePrefix = "images/skybox/stars-";
 		directions  = ["xpos", "xneg", "xpos", "xpos", "xpos", "xpos"];
 		imageSuffix = ".jpg";
-		skyGeometry = new THREE.CubeGeometry(768, 768, 768);	
+		skyGeometry = new THREE.CubeGeometry(768,768,768);	
 		materialArray = [];
 		for (var i = 0; i < 6; i++)
 			materialArray.push( new THREE.MeshBasicMaterial({
