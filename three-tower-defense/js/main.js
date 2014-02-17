@@ -7,7 +7,7 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 25, currentWave = 0, currentMonsters = 0,
 	addExtraHP = 0,	coins = new Array(), gameStarted = false,
-	healthBars = new Array(), maxWaves = 30,
+	healthBars = new Array(), maxWaves = 50,
 	tower01, basePosY = 0, bulletTweens = new Array(), monsterIntervals = new Array();
 
 function newGame() {
@@ -41,7 +41,7 @@ function newGame() {
 	currentMonsters = 0;
 	addExtraHP = 0;
 	coins = new Array();
-	maxWaves = 30;
+	maxWaves = 60;
 	bulletTweens = new Array();
 	score.currency = 25;
 	score.lives = 20;
@@ -141,6 +141,13 @@ function preLoader() {
 		textureTower03.needsUpdate = true;
 	} );
 	
+	textureUfo = new THREE.Texture();
+	loader = new THREE.ImageLoader(manager);
+	loader.load('files/models/enemy01.jpg', function (image) {
+		textureUfo.image = image;
+		textureUfo.needsUpdate = true;
+	} );
+	
 	loader = new THREE.OBJLoader(manager);
 	loader.load('files/models/rock_bottom.obj', function (object) {
 
@@ -179,7 +186,18 @@ function preLoader() {
 						}
 					} );
 					window.tower03Model = object.children[0];
-					init();
+					
+					loader = new THREE.OBJLoader(manager);
+					loader.load('files/models/ufo.obj', function (object) {
+
+						object.traverse( function ( child ) {
+							if ( child instanceof THREE.Mesh ) {
+								child.material.map = textureUfo;
+							}
+						} );
+						window.ufo = object.children[0];
+						init();
+					});
 				});
 			} );
 		} );
@@ -216,7 +234,7 @@ function init() {
 	document.getElementById('lives').innerHTML = score.lives;
 	updateCurrency();
 	scene = new THREE.Scene();
-	renderer = new THREE.WebGLRenderer({antialias:false});
+	renderer = new THREE.WebGLRenderer({antialias:true,maxLights: 10});
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	if (detailLevel == 'high') {
 		renderer.shadowMapEnabled = true;
@@ -244,17 +262,18 @@ function init() {
 	controls.addEventListener('change', render);
 	
 	// Lights
+	var light = new THREE.AmbientLight( 0x16080c ); // soft white light
+	scene.add( light );
 	sunLight = new THREE.SpotLight(0xffffff);
 	sunLight.position.set(-256, 86, 0);
-	scene.add(sunLight);
-	sunLight.intensity = 1.80;
+	sunLight.intensity = 1.90;
 	if (devMode == true) {
 		sunLight.shadowCameraVisible = true;
 	}
 	sunLight.shadowDarkness = 0.20;
 	sunLight.castShadow = true;
-	var ambientLight = new THREE.AmbientLight(0x404040);
-	scene.add(ambientLight);
+	scene.add(sunLight);
+	
 	rockBottom.scale.x = 0.125;
 	rockBottom.scale.y = 0.125;
 	rockBottom.scale.z = 0.125;
@@ -317,6 +336,11 @@ function init() {
 			tile.position.y = 0.1 + ((boardSize.y / 2) + (basePosY));
 			tile.position.z = calculateYPosition(y);
 
+			if (detailLevel == 'high') {
+				tile.castShadow = true;
+				tile.receiveShadow = true;
+			}
+
 			// Make the tile a little smaller to fit nicely on the map
 			tile.size.x = tileSize - 0.25;
 			tile.size.z = tileSize - 0.25;
@@ -344,11 +368,6 @@ function init() {
 			else {
 				indexCount = count;
 				tiles[count].callback = function() { return showBuildmenu(this); }
-			}
-
-			if (detailLevel == 'high') {
-				tiles[count].castShadow = true;
-				tiles[count].receiveShadow = true;
 			}
 			tiles[count].index = count;
 			scene.add(tiles[count]);
@@ -386,8 +405,8 @@ function render() {
 	}
 	for (i = 0; i < tiles.length; i++) {
 		if (tiles[i].selected != undefined && tiles[i].selected == true) {
-			tiles[i].rotation.z += 0.008;
 			activeTimer = Date.now() * 0.00525;
+			tiles[i].rotation.z += 0.008;
 			tiles[i].position.y = floor.position.y + (boardSize.y) + (Math.sin(activeTimer) * 2);
 			if (towers[i] != undefined) {
 				// Active tower has to be on top of the selected tile as well (for updating)
@@ -401,41 +420,22 @@ function render() {
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
 		healthBars[i].position.y = monsters[i].position.y + 5;
+		monsters[i].rotation.y += 0.01;
 		if (tmpMX > monsters[i].position.x) {
 			monsters[i].position.x += monsters[i].stats.speed;
 			healthBars[i].position.x += monsters[i].stats.speed;
-			if (detailLevel == 'high' || detailLevel == 'medium') {
-				monsters[i].rotation.x = 0;
-				monsters[i].rotation.y = 0;
-				monsters[i].rotation.z -= monsters[i].stats.speed / 5;
-			}
 		}
 		else if (tmpMX < monsters[i].position.x) {
 			monsters[i].position.x -= monsters[i].stats.speed;
 			healthBars[i].position.x -= monsters[i].stats.speed;
-			if (detailLevel == 'high' || detailLevel == 'medium') {
-				monsters[i].rotation.x = 0;
-				monsters[i].rotation.y = 0;
-				monsters[i].rotation.z += monsters[i].stats.speed / 5;
-			}
 		}
 		else if (tmpMY > monsters[i].position.z) {
 			monsters[i].position.z += monsters[i].stats.speed;
 			healthBars[i].position.z += monsters[i].stats.speed;
-			if (detailLevel == 'high' || detailLevel == 'medium') {
-				monsters[i].rotation.z = 0;
-				monsters[i].rotation.y = 0;
-				monsters[i].rotation.x += monsters[i].stats.speed / 5;
-			}
 		}
 		else if (tmpMY < monsters[i].position.z) {
 			monsters[i].position.z -= monsters[i].stats.speed;
 			healthBars[i].position.z -= monsters[i].stats.speed;
-			if (detailLevel == 'high' || detailLevel == 'medium') {
-				monsters[i].rotation.z = 0;
-				monsters[i].rotation.y = 0;
-				monsters[i].rotation.x -= monsters[i].stats.speed / 5;
-			}
 		}
 		// @todo fix correct position check
 		if (tmpMX == monsters[i].position.x && tmpMY == monsters[i].position.z) {
@@ -517,9 +517,13 @@ function spawnMonster(tile, extraStats) {
 		currentMonsters--;
 		return false;
 	}
-	monster = new Monster(THREE);
+	if (typeof extraStats == 'undefined') {
+		extraStats = new Object();
+		extraStats.type = 1;
+	}
+	monster = new Monster(THREE, extraStats.type);
 	monster.position.x = tile.position.x;
-	monster.position.y = basePosY + tile.position.y + (monster.size.y / 5.5);
+	monster.position.y = basePosY + tile.position.y + (monster.size.x / 2);
 	monster.position.z = tile.position.z;
 	monster.create();
 	monsterObject = monster.getObject();
@@ -711,6 +715,7 @@ function createBullet(tower, targetIndex, towerIndex) {
 	someBullet.stats = tower.stats;
 	someBullet.targetIndex = targetIndex;
 	someBullet.towerIndex = towerIndex;
+	
 	bullets.push(someBullet);
 	scene.add(bullets[bullets.length-1]);
 	setTimeout(function() {

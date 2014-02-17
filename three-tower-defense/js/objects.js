@@ -26,10 +26,10 @@ buildings[0].size.x = (tileSize-0.25);
 buildings[0].size.y = (tileSize-0.25);
 buildings[0].size.z = (tileSize-0.25);
 buildings[0].heightPos = 0;
-buildings[0].costs = 3;
+buildings[0].costs = 2;
 buildings[0].stats = new Object();
 buildings[0].stats.speed = 400;
-buildings[0].stats.damage = 4;
+buildings[0].stats.damage = 8;
 buildings[0].stats.range = 3;
 buildings[0].projectile = function() {
 	bullet = new THREE.Mesh(
@@ -54,11 +54,11 @@ buildings[1].size.x = (tileSize-0.25);
 buildings[1].size.y = (tileSize-0.25);
 buildings[1].size.z = (tileSize-0.25);
 buildings[1].heightPos = 0;
-buildings[1].costs = 12;
+buildings[1].costs = 8;
 buildings[1].stats = new Object();
 buildings[1].stats.speed = 560;
-buildings[1].stats.damage = 15;
-buildings[1].stats.range = 3;
+buildings[1].stats.damage = 24;
+buildings[1].stats.range = 4;
 buildings[1].projectile = function() {
 	bullet = new THREE.Mesh(
 		new THREE.SphereGeometry((tileSize/28), 6, 4),
@@ -81,10 +81,10 @@ buildings[2].size.x = (tileSize-0.25);
 buildings[2].size.y = (tileSize-0.25);
 buildings[2].size.z = (tileSize-0.25);
 buildings[2].heightPos = 0;
-buildings[2].costs = 30;
+buildings[2].costs = 26;
 buildings[2].stats = new Object();
 buildings[2].stats.speed = 800;
-buildings[2].stats.damage = 36;
+buildings[2].stats.damage = 45;
 buildings[2].stats.range = 6;
 buildings[2].projectile = function() {
 	bullet = new THREE.Mesh(
@@ -171,7 +171,7 @@ var Tile = function(t) {
 				map: texture
 			}
 		);
-		geometry = new t.PlaneGeometry(this.size.x, this.size.z);
+		geometry = new t.CubeGeometry( this.size.x, this.size.z, 0.2 ); // new t.PlaneGeometry(this.size.x, this.size.z);
 		object = new t.Mesh(geometry, material);
 		object.position.set(this.position.x, this.position.y, this.position.z);
 		object.rotation.x = -1.57;

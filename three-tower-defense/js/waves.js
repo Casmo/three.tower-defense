@@ -18,24 +18,38 @@ function spawnWave() {
 	x = 0;
 	maxY = Math.floor(boardSize.z / tileSize) - 1;
 	timeOut = 0;
-	countMonsters = Math.round(currentWave * 1.5);
+	countMonsters = Math.ceil(currentWave * 0.50);
 	currentMonsters = countMonsters;
 	
 	someStats = new Object();
-	someStats.hp = Math.round((currentWave+1) * 22);
-	someStats.hp_100 = someStats.hp;
+	someStats.hp = Math.round((currentWave+1) * 68);
 	
 	someStats.speed = 0.125;
-	if (currentWave > 6) {
-		someStats.speed = 0.250;
+	someStats.currency = Math.round(Math.random() * 4) + 1;
+	someStats.type = 1;
+	if (currentWave > 40) {
+		someStats.type = 5;
+		someStats.hp *= 12;
+		someStats.currency += 5;
 	}
-	if (currentWave > 12) {
-		someStats.speed = 0.5;
+	else if (currentWave > 30) {
+		someStats.type = 4;
+		someStats.hp *= 6;
+		someStats.currency += 4;
 	}
-	if (someStats.speed > 10) {
-		someStats.speed = 10;
+	else if (currentWave > 20) {
+		someStats.type = 3;
+		someStats.hp *= 3;
+		someStats.currency += 3;
 	}
-	someStats.currency = 1;
+	else if (currentWave > 10) {
+		someStats.type = 2;
+		someStats.hp *= 1.5;
+		someStats.currency += 2;
+	}
+
+	someStats.hp_100 = someStats.hp;
+	
 	timePerMonsterInMs = 650;
 	timeOut = 0;
 	for (i = 0; i < currentMonsters; i++) {

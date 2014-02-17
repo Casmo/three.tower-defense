@@ -1,23 +1,49 @@
 /**
  * Class to manage monsters
  */
-var Monster = function(t) {
+var Monster = function(t, type) {
 	
 	this.object;
-	this.texture = 'images/monster-001.jpg';
+	this.texture = 'files/models/enemy01.jpg';
 	this.stats = new Object();
 	this.stats.hp = 15;
 	this.stats.hp_100 = 15;
 	this.stats.speed = 0.125;
 	this.stats.currency = 1;
 	this.size = new Object();
-	this.size.x = tileSize / 2;
+	this.size.x = tileSize / 6;
 	this.size.y = tileSize * 2;
 	this.size.z = tileSize * 2;
 	this.position = new Object();
 	this.position.x = 10;
-	this.position.y = 6.25;
+	this.position.y = 4.25;
 	this.position.z = 0;
+	this.scale = 0.01;
+
+	if (typeof type != 'undefined') {
+		switch (type) {
+			case 2:
+			this.texture = 'files/models/enemy02.jpg';
+			this.scale = 0.02;
+			this.position.y = 3.25;
+			break;
+			case 3:
+			this.texture = 'files/models/enemy03.jpg';
+			this.scale = 0.03;
+			this.position.y = 2.25;
+			break;
+			case 4:
+			this.texture = 'files/models/enemy04.jpg';
+			this.scale = 0.04;
+			this.position.y = 1.25;
+			break;
+			case 5:
+			this.texture = 'files/models/enemy05.jpg';
+			this.scale = 0.05;
+			this.position.y = 0.25;
+			break;
+		}
+	}
 	
 	// Store the end tile for this monster
 	this.currentStep = new Object();
@@ -35,8 +61,15 @@ var Monster = function(t) {
 			}
 		);
 		geometry = new t.SphereGeometry(this.size.x, this.size.y, this.size.z);
-		this.object = new t.Mesh(geometry, material);
+
+		var refObject = window.ufo;
+		this.object = new THREE.Mesh(refObject.geometry, material);
+		
+		//this.object = new t.Mesh(geometry, material);
 		this.object.position.set(this.position.x, this.position.y, this.position.z);
+		this.object.scale.x = this.scale;
+		this.object.scale.y = this.scale;
+		this.object.scale.z = this.scale;
 		this.currentStep.x = 0;
 		this.currentStep.y = calculateY(this.position.z);
 		this.setNodes();
