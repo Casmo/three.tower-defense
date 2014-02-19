@@ -7,7 +7,7 @@ var camera, controls, scene, renderer, projector, sunLight, sunLightTimer = 300,
 	monsterModels = new Array(), loader, manager, rockBottom,
 	explosions = new Array(), particleCount = 25, currentWave = 0, currentMonsters = 0,
 	addExtraHP = 0,	coins = new Array(), gameStarted = false,
-	healthBars = new Array(), maxWaves = 50,
+	healthBars = new Array(), maxWaves = 25,
 	tower01, basePosY = 0, bulletTweens = new Array(), monsterIntervals = new Array();
 
 function newGame() {
@@ -41,9 +41,9 @@ function newGame() {
 	currentMonsters = 0;
 	addExtraHP = 0;
 	coins = new Array();
-	maxWaves = 60;
+	maxWaves = 25;
 	bulletTweens = new Array();
-	score.currency = 25;
+	score.currency = 15;
 	score.lives = 20;
 	document.getElementById('spawn_waves').innerHTML = 'START GAME';
 	document.getElementById('spawn_percent').style.width = '1%';
@@ -61,7 +61,7 @@ var skyBox = '';
  * Score of the player
  */
 var score = new Object();
-score.currency = 25;
+score.currency = 15;
 score.lives = 20;
 
 /**
@@ -420,7 +420,7 @@ function render() {
 		tmpMX = calculateXPosition(monsters[i].nextStep.x);
 		tmpMY = calculateYPosition(monsters[i].nextStep.y);
 		healthBars[i].position.y = monsters[i].position.y + 5;
-		monsters[i].rotation.y += 0.01;
+		monsters[i].rotation.y += 0.03;
 		if (tmpMX > monsters[i].position.x) {
 			monsters[i].position.x += monsters[i].stats.speed;
 			healthBars[i].position.x += monsters[i].stats.speed;

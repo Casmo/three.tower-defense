@@ -20,7 +20,7 @@ a:hover { color: #fff; }
     border-bottom: 3px solid #000;
 }
 .bottom-nav {
-    height: 200px;
+    height: 105px;
     background-image: url(../images/building-background.png);
 }
 #about_info {
@@ -158,8 +158,8 @@ a:hover { color: #fff; }
 	position: absolute;
 	width: 250px;
 	left: 50%;
-	margin-left: -125px;
-	bottom: 220px;
+	margin-left: -135px;
+	bottom: 110px;
 	padding: 10px;
     background-image: url(../images/building-background.png);
     border: 2px solid #000;

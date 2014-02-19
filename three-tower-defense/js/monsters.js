@@ -18,29 +18,25 @@ var Monster = function(t, type) {
 	this.position.x = 10;
 	this.position.y = 4.25;
 	this.position.z = 0;
-	this.scale = 0.01;
+	this.scale = 0.6;
 
 	if (typeof type != 'undefined') {
 		switch (type) {
 			case 2:
 			this.texture = 'files/models/enemy02.jpg';
-			this.scale = 0.02;
-			this.position.y = 3.25;
+			this.scale = 0.7;
 			break;
 			case 3:
 			this.texture = 'files/models/enemy03.jpg';
-			this.scale = 0.03;
-			this.position.y = 2.25;
+			this.scale = 0.8;
 			break;
 			case 4:
 			this.texture = 'files/models/enemy04.jpg';
-			this.scale = 0.04;
-			this.position.y = 1.25;
+			this.scale = 0.9;
 			break;
 			case 5:
 			this.texture = 'files/models/enemy05.jpg';
-			this.scale = 0.05;
-			this.position.y = 0.25;
+			this.scale = 1;
 			break;
 		}
 	}
