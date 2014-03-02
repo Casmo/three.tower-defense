@@ -13,6 +13,7 @@ function spawnWave() {
 		else {
 			document.getElementById('spawn_waves').innerHTML = 'Failed!';
 		}
+		gameStarted = false;
 		return true;
 	}
 	x = 0;
@@ -27,15 +28,27 @@ function spawnWave() {
 	someStats.speed = 0.125;
 	someStats.currency = Math.round(Math.random() * 2) + 1;
 	someStats.type = 1;
-	if (currentWave > 23) {
+
+	if (currentWave > 24) {
 		someStats.type = 5;
-		someStats.hp *= 26;
-		currentMonsters = Math.ceil(currentMonsters / 4);
-		someStats.currency += 5;
+		someStats.hp *= 38;
+		currentMonsters = 2;
+		someStats.currency += 50;
+	}
+	else if (currentWave > 23) {
+		someStats.type = 5;
+		someStats.hp *= 60;
+		currentMonsters = 1;
+		someStats.currency += 50;
+	}
+	else if (currentWave > 20) {
+		someStats.type = 4;
+		someStats.hp *= 4.6;
+		someStats.currency += 10;
 	}
 	else if (currentWave > 15) {
 		someStats.type = 4;
-		someStats.hp *= 4.6;
+		someStats.hp *= 4.5;
 		someStats.currency += 7;
 	}
 	else if (currentWave > 10) {
@@ -47,6 +60,10 @@ function spawnWave() {
 		someStats.type = 2;
 		someStats.hp *= 1.5;
 		someStats.currency += 2;
+	}
+	
+	if (currentMonsters > 29) {
+		currentMonsters = 29;
 	}
 
 	someStats.hp_100 = someStats.hp;

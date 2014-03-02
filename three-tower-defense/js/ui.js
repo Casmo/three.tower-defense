@@ -55,7 +55,9 @@ function showBuildmenu(tile) {
     });
     if (buildingDestroy != undefined) {
 		buildingDestroy.addEventListener('click', function() {
-			destroyTower(tile.index);deselectTiles();hideBuildmenu();
+			destroyTower(tile.index);hideBuildmenu();
+			selectTile(tile);
+			showBuildmenu(tile);
 	    });
     }
 }
